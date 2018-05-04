@@ -11,6 +11,20 @@ exports.seed = function(knex, Promise) {
           vol_email: 'samvschantz@gmail.com',
           hours: '68',
           vol_password: 'hashed_password_very_secure'
+        },
+        {
+          id: 2,
+          vol_name: `Dominic Bartlomowicz`,
+          vol_email: 'dbart@gmail.com',
+          hours: '33',
+          vol_password: 'hashed_password_very_secure'
+        },
+        {
+          id: 3,
+          vol_name: `Natalie Schultz`,
+          vol_email: 'natschultz@gmail.com',
+          hours: '45',
+          vol_password: 'hashed_password_very_secure'
         }),
       ]);
     });

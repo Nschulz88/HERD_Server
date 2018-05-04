@@ -21,19 +21,33 @@ const knexLogger  = require('knex-logger');
 
 // app.use(morgan);
 
-const knex = require('knex')(knexConfig[ENV])({
-  client: 'pg',
-  connection: {
-    database: 'herd'
-  }
-});
+const knex = require('knex')(knexConfig[ENV])
 app.use(express.static('public'));
+
 app.get('/volunteers', (req, res) => {
   console.log("lksjfkajfkljdflkjafd");
   knex('volunteers')
     .select('*')
     .then(volunteers => {
       res.json(volunteers);
+    });
+});
+
+app.get('/organizers', (req, res) => {
+  console.log("lksjfkajfkljdflkjafd");
+  knex('organizers')
+    .select('*')
+    .then(organizers => {
+      res.json(organizers);
+    });
+});
+
+app.get('/events', (req, res) => {
+  console.log("lksjfkajfkljdflkjafd");
+  knex('events')
+    .select('*')
+    .then(events => {
+      res.json(events);
     });
 });
 
