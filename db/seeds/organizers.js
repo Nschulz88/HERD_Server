@@ -2,6 +2,7 @@
 exports.seed = function(knex, Promise) {
   // Deletes ALL existing entries
   return knex('events').del()
+  return knex('volunteers').del()
   return knex('organizers').del()
     .then(function () {
       // Inserts seed entries
@@ -13,16 +14,16 @@ exports.seed = function(knex, Promise) {
           org_name: 'Joel',
           org_email: 'joel@bcchildrens.ca',
           org_password: 'very_secure_hashed_password'
-        },
-        {
+        }),
+        knex('organizers').insert({
           id: 2,
           organization: 'Audobon Society',
           org_details: 'We like birds and making sure they survive long into the distant future when theres robots n stuff',
           org_name: 'Rohit',
           org_email: 'rohit@audobon.com',
           org_password: 'very_secure_hashed_password'
-        },
-        {
+        }),
+        knex('organizers').insert({
           id: 3,
           organization: 'Clean Beaches BC',
           org_details: 'We like our beaches like we like our forests and rivers, clean.',

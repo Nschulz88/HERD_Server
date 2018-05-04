@@ -16,8 +16,8 @@ exports.seed = function(knex, Promise) {
           event_date: '2016-06-23',
           event_time: '18:30',
           event_duration: 2
-        },
-        {
+        }),
+        knex('events').insert({
           id: 2,
           organizer_id: 2,
           volunteer_id: 2,
@@ -28,8 +28,8 @@ exports.seed = function(knex, Promise) {
           event_date: '2019-12-14',
           event_time: '13:30',
           event_duration: 6
-        },
-        {
+        }),
+        knex('events').insert({
           id: 3,
           organizer_id: 3,
           volunteer_id: 3,
@@ -39,7 +39,7 @@ exports.seed = function(knex, Promise) {
           criteria: 'Get a tetanus shot that water nastay',
           event_date: '2018-02-11',
           event_time: '18:30',
-          event_duration: 2
+          event_duration: 3
         }),
       ]);
     });

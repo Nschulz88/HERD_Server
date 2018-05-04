@@ -3,6 +3,7 @@ exports.up = function(knex, Promise) {
   return Promise.all([
     knex.schema.createTable('organizers', function (table) {
       table.increments('id'),
+      table.foreign('id').references('Events.organizer_id'),
       table.varchar('organization', 255),
       table.text('org_details'),
       table.varchar('org_name', 255),
@@ -11,8 +12,8 @@ exports.up = function(knex, Promise) {
     }),
     knex.schema.createTable('events', function (table) {
       table.increments('id'),
-      table.integer('organizer_id').references('id').inTable('organizers'),
-      table.integer('volunteer_id').references('id').inTable('volunteers'),
+      table.integer('organizer_id'),
+      table.integer('volunteer_id'),
       table.varchar('event_size', 255),
       table.varchar('location', 255),
       table.varchar('event_description', 255),
@@ -22,6 +23,7 @@ exports.up = function(knex, Promise) {
     }),
     knex.schema.createTable('volunteers', function (table) {
       table.increments('id'),
+      table.foreign('id').references('Events.volunteer_id'),
       table.varchar('vol_name', 255),
       table.varchar('vol_email', 255),
       table.varchar('vol_hours', 255),
