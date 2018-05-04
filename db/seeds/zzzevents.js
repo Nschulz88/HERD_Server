@@ -16,6 +16,30 @@ exports.seed = function(knex, Promise) {
           event_date: '2016-06-23',
           event_time: '18:30',
           event_duration: 2
+        },
+        {
+          id: 2,
+          organizer_id: 2,
+          volunteer_id: 2,
+          event_size: 500,
+          location: 'Lighthouse Labs',
+          event_description: 'Birdwatching',
+          criteria: 'BYOBinoculars',
+          event_date: '2019-12-14',
+          event_time: '13:30',
+          event_duration: 6
+        },
+        {
+          id: 3,
+          organizer_id: 3,
+          volunteer_id: 3,
+          event_size: 10,
+          location: 'UBC Campus',
+          event_description: 'Swimming in the fountain for charity',
+          criteria: 'Get a tetanus shot that water nastay',
+          event_date: '2018-02-11',
+          event_time: '18:30',
+          event_duration: 2
         }),
       ]);
     });
