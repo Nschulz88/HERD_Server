@@ -14,18 +14,14 @@ const dev = app.get('env') !== 'production'
 const bodyParser  = require("body-parser");
 
 const knexConfig  = require("./knexfile");
-const knex        = require("knex")(knexConfig[ENV]);
+//const knex        = require("knex")(knexConfig[ENV]);
 const knexLogger  = require('knex-logger');
 
 // Log knex SQL queries to STDOUT as well
-app.use(knexLogger(knex));
-
-const express = require('express');
-const app = express();
 
 // app.use(morgan);
 
-const knex = require('knex')({
+const knex = require('knex')(knexConfig[ENV])({
   client: 'pg',
   connection: {
     database: 'herd'
@@ -40,6 +36,8 @@ app.get('/volunteers', (req, res) => {
       res.json(volunteers);
     });
 });
+
+app.use(knexLogger(knex));
 
 app.listen(3001);
 
