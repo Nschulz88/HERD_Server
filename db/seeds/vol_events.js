@@ -20,6 +20,16 @@ exports.seed = function(knex, Promise) {
           event_id: 3,
           vol_id: 3
         }),
+        knex('vol_events').insert({
+          id: 4,
+          event_id: 2,
+          vol_id: 3
+        }),
+        knex('vol_events').insert({
+          id: 5,
+          event_id: 3,
+          vol_id: 2
+        }),
       ]);
     });
 };
