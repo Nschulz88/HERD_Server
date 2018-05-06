@@ -76,6 +76,39 @@ app.post('/volunteers', (req, res) => {
     })
 })
 
+app.post('/login', (req, res) => {
+  console.log(req.body)
+  if (req.body.vol_org === 'vol'){
+    knex('volunteers')
+      .select('*')
+      .where({
+        vol_email     : req.body.username,
+        vol_password  : req.body.password
+      })
+      .then(volunteers => {
+        console.log(volunteers)
+        res.json(volunteers)
+      })
+      .catch(err =>{
+        throw err
+      })
+  } else {
+    knex('organizers')
+      .select('*')
+      .where({
+        organizer_email     : req.body.username,
+        organizer_password  : req.body.password
+      })
+      .then(organizers => {
+        console.log(organizers)
+        res.json(organizers)
+      })
+      .catch(err =>{
+        throw err
+      })
+  }
+})
+
 app.post('/events', (req, res) => {
   console.log("posted to events!")
   console.log(req.body)
