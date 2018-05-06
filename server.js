@@ -61,6 +61,21 @@ app.post('/organizers', (req, res) => {
     })
 })
 
+app.post('/volunteers', (req, res) => {
+  console.log("posted to volunteers!")
+  console.log(req.body)
+  knex('volunteers')
+    .insert({
+      vol_name        :req.body.full_name,
+      vol_email       :req.body.username,
+      vol_password    :req.body.unhashed_pass,
+    }).then(volunteers => {
+      res.json(volunteers)
+    }).catch(err =>{
+      throw err
+    })
+})
+
 app.post('/events', (req, res) => {
   console.log("posted to events!")
   console.log(req.body)
