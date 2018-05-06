@@ -114,6 +114,7 @@ app.post('/events', (req, res) => {
   knex('events')
     .insert({
       location            :req.body.location,
+      GMaps_API_location  :req.body.GMaps_API_location,
       event_size          :req.body.event_size,
       event_description   :req.body.event_description,
       criteria            :req.body.criteria,
