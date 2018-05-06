@@ -50,12 +50,33 @@ app.post('/organizers', (req, res) => {
   console.log(req.body)
   knex('organizers')
     .insert({
-      organization_name     :req.body.organization_name,
+      organization_name     :req.body.organization,
       organizer_name        :req.body.full_name,
       organizer_email       :req.body.username,
       organizer_password    :req.body.unhashed_pass,
     }).then(organizers => {
       res.json(organizers)
+    }).catch(err =>{
+      throw err
+    })
+})
+
+app.post('/events', (req, res) => {
+  console.log("posted to events!")
+  console.log(req.body)
+  knex('events')
+    .insert({
+      location            :req.body.location,
+      event_size          :req.body.event_size,
+      event_description   :req.body.event_description,
+      criteria            :req.body.criteria,
+      event_date          :req.body.event_date,
+      event_time          :req.body.event_time,
+      duration            :req.body.duration
+    }).then(organizers => {
+      res.json(organizers)
+    }).catch(err =>{
+      throw err
     })
 })
 
