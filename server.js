@@ -49,12 +49,81 @@ app.post('/organizers', (req, res) => {
   console.log(req.body)
   knex('organizers')
     .insert({
-      organization_name     :req.body.organization_name,
+      organization_name     :req.body.organization,
       organizer_name        :req.body.full_name,
       organizer_email       :req.body.username,
       organizer_password    :req.body.unhashed_pass,
     }).then(organizers => {
       res.json(organizers)
+    }).catch(err =>{
+      throw err
+    })
+})
+
+app.post('/volunteers', (req, res) => {
+  console.log("posted to volunteers!")
+  console.log(req.body)
+  knex('volunteers')
+    .insert({
+      vol_name        :req.body.full_name,
+      vol_email       :req.body.username,
+      vol_password    :req.body.unhashed_pass,
+    }).then(volunteers => {
+      res.json(volunteers)
+    }).catch(err =>{
+      throw err
+    })
+})
+
+app.post('/login', (req, res) => {
+  console.log(req.body)
+  if (req.body.vol_org === 'vol'){
+    knex('volunteers')
+      .select('*')
+      .where({
+        vol_email     : req.body.username,
+        vol_password  : req.body.password
+      })
+      .then(volunteers => {
+        console.log(volunteers)
+        res.json(volunteers)
+      })
+      .catch(err =>{
+        throw err
+      })
+  } else {
+    knex('organizers')
+      .select('*')
+      .where({
+        organizer_email     : req.body.username,
+        organizer_password  : req.body.password
+      })
+      .then(organizers => {
+        console.log(organizers)
+        res.json(organizers)
+      })
+      .catch(err =>{
+        throw err
+      })
+  }
+})
+
+app.post('/events', (req, res) => {
+  console.log("posted to events!")
+  console.log(req.body)
+  knex('events')
+    .insert({
+      location            :req.body.location,
+      event_size          :req.body.event_size,
+      event_description   :req.body.event_description,
+      criteria            :req.body.criteria,
+      event_date          :req.body.event_date,
+      event_time          :req.body.event_time,
+      duration            :req.body.duration
+    }).then(organizers => {
+      res.json(organizers)
+    }).catch(err =>{
+      throw err
     })
 })
 

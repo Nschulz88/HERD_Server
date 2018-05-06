@@ -6,7 +6,7 @@ exports.seed = function(knex, Promise) {
       // Inserts seed entries
       return Promise.all([
         knex('events').insert({
-          id: 1,
+          id: 10,
           organizer_id: 1,
           GMaps_API_location: {
                                  "results" : [
@@ -145,7 +145,7 @@ exports.seed = function(knex, Promise) {
           duration: 2
         }),
         knex('events').insert({
-          id: 2,
+          id: 11,
           organizer_id: 2,
           GMaps_API_location: {
                                  "results" : [
@@ -235,7 +235,7 @@ exports.seed = function(knex, Promise) {
           duration: 6
         }),
         knex('events').insert({
-          id: 3,
+          id: 12,
           organizer_id: 3,
           GMaps_API_location: {
                                  "results" : [
