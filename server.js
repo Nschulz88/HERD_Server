@@ -23,9 +23,10 @@ const knexLogger  = require('knex-logger');
 
 const knex = require('knex')(knexConfig[ENV])
 app.use(express.static('public'));
+app.use(knexLogger(knex));
 
 app.get('/volunteers', (req, res) => {
-  console.log("lksjfkajfkljdflkjafd");
+  console.log("volunteers");
   knex('volunteers')
     .select('*')
     .then(volunteers => {
@@ -34,7 +35,7 @@ app.get('/volunteers', (req, res) => {
 });
 
 app.get('/organizers', (req, res) => {
-  console.log("lksjfkajfkljdflkjafd");
+  console.log("organizers");
   knex('organizers')
     .select('*')
     .then(organizers => {
@@ -42,16 +43,23 @@ app.get('/organizers', (req, res) => {
     });
 });
 
+app.post('/organizers', (req, res) => {
+  console.log("posted to organizers!")
+})
+
 app.get('/events', (req, res) => {
-  console.log("lksjfkajfkljdflkjafd");
-  knex('events')
+  console.log("events");
+  knex('volunteers')
+    .join('vol_events', 'vol_events.vol_id', '=', 'volunteers.id')
+    .join('events', 'vol_events.event_id', '=', 'events.id')
     .select('*')
-    .then(events => {
-      res.json(events);
+    .then(relevantVolunteers => {
+      relevantVolunteers.forEach((e) => {
+        console.log(`${e.vol_name} has volunteered to go ${e.event_description}`)
+      })
+      res.json(relevantVolunteers);
     });
 });
-
-app.use(knexLogger(knex));
 
 app.listen(3001);
 
