@@ -20,7 +20,7 @@ const knex        = require("knex")(knexConfig[ENV]);
 const knexLogger  = require('knex-logger');
 
 const bcrypt = require('bcrypt');
-var cookieSession = require('cookie-session')
+const cookieSession = require('cookie-session')
 app.use(cookieSession({
   name: 'session',
   keys: ['yaherd'],
@@ -53,7 +53,7 @@ app.get('/organizers', (req, res) => {
 
 app.post('/organizers', (req, res) => {
   console.log("posted to organizers!")
-  console.log(req.body)
+  console.log(req.body.user_id)
   knex('organizers')
     .select('*')
     .where({
@@ -119,14 +119,13 @@ app.post('/login', (req, res) => {
         vol_email     : req.body.username
       })
       .then(volunteer => {
-        bcrypt.compare(req.body.password, volunteer[0].vol_password, function(err, res) {
-          if(res === true){
-            console.log(volunteer)
+        bcrypt.compare(req.body.password, volunteer[0].vol_password, function(err, result) {
+          if(result === true){
             req.session.user_id = volunteer[0].id;
             req.session.vol_org = 'volunteer';
-            console.log(req.session)
+            res.json({});
           } else {
-            console.log('unauth')
+            res.status(401).json({});
           }
         });
       })
@@ -140,15 +139,14 @@ app.post('/login', (req, res) => {
         organizer_email     : req.body.username
       })
       .then(organizer => {
-        bcrypt.compare(req.body.password, organizer[0].organizer_password, function(err, res) {
-          if(res === true){
+        bcrypt.compare(req.body.password, organizer[0].organizer_password, function(err, result) {
+          if(result === true){
             console.log(organizer)
             req.session.user_id = organizer[0].id;
             req.session.vol_org = 'organizer';
-            console.log(req.session)
+            res.json({});
           } else {
-            //res.redirect()
-            console.log('unauth')
+            res.status(401).json({});
           }
         })
       })
@@ -180,6 +178,7 @@ app.post('/events', (req, res) => {
 
 app.get('/events', (req, res) => {
   console.log("events");
+  console.log(req.session)
   knex('events')
     .select('*')
     .then(allEvents => {
