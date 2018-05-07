@@ -19,6 +19,8 @@ const knexConfig  = require("./knexfile");
 const knex        = require("knex")(knexConfig[ENV]);
 const knexLogger  = require('knex-logger');
 
+const bcrypt = require('bcrypt')
+
 // Log knex SQL queries to STDOUT as well
 
 // app.use(morgan);
@@ -48,30 +50,58 @@ app.post('/organizers', (req, res) => {
   console.log("posted to organizers!")
   console.log(req.body)
   knex('organizers')
-    .insert({
-      organization_name     :req.body.organization,
-      organizer_name        :req.body.full_name,
-      organizer_email       :req.body.username,
-      organizer_password    :req.body.unhashed_pass,
-    }).then(organizers => {
-      res.json(organizers)
-    }).catch(err =>{
+    .select('*')
+    .where({
+      organizer_email: req.body.username
+    })
+    .then(match => {
+      if (match.length >= 1){
+        console.log('email already entered')
+      } else {
+        knex('organizers')
+          .insert({
+            organization_name     :req.body.organization,
+            organizer_name        :req.body.full_name,
+            organizer_email       :req.body.username,
+            organizer_password    :bcrypt.hashSync(req.body.unhashed_pass, 10),
+          }).then(organizers => {
+            res.json(organizers)
+          }).catch(err =>{
+            throw err
+          })
+      }
+    })
+    .catch(err =>{
       throw err
     })
 })
 
 app.post('/volunteers', (req, res) => {
-  console.log("posted to volunteers!")
-  console.log(req.body)
+  console.log("posted to volunteers!");
+  console.log(req.body);
   knex('volunteers')
-    .insert({
-      vol_name        :req.body.full_name,
-      vol_email       :req.body.username,
-      vol_password    :req.body.unhashed_pass,
-    }).then(volunteers => {
-      res.json(volunteers)
-    }).catch(err =>{
-      throw err
+    .select('*')
+    .where({
+      vol_email: req.body.username
+    })
+    .then(match => {
+      if (match.length >= 1){
+        console.log('email already entered')
+      } else {
+        knex('volunteers')
+          .insert({
+            vol_name        :req.body.full_name,
+            vol_email       :req.body.username,
+            vol_password    :bcrypt.hashSync(req.body.unhashed_pass, 10),
+          }).then(volunteers => {
+            res.json(volunteers);
+          }).catch(err =>{
+            throw err;
+          })
+      }
+    })
+    .catch(err =>{
+      throw err;
     })
 })
 
@@ -81,12 +111,12 @@ app.post('/login', (req, res) => {
     knex('volunteers')
       .select('*')
       .where({
-        vol_email     : req.body.username,
-        vol_password  : req.body.password
+        vol_email     : req.body.username
       })
-      .then(volunteers => {
-        console.log(volunteers)
-        res.json(volunteers)
+      .then(volunteer => {
+        bcrypt.compare(req.body.password, volunteer[0].vol_password, function(err, res) {
+          console.log(res)
+        });
       })
       .catch(err =>{
         throw err
@@ -95,12 +125,12 @@ app.post('/login', (req, res) => {
     knex('organizers')
       .select('*')
       .where({
-        organizer_email     : req.body.username,
-        organizer_password  : req.body.password
+        organizer_email     : req.body.username
       })
-      .then(organizers => {
-        console.log(organizers)
-        res.json(organizers)
+      .then(organizer => {
+        bcrypt.compare(req.body.password, organizer[0].organizer_password, function(err, res) {
+          console.log(res)
+        })
       })
       .catch(err =>{
         throw err
