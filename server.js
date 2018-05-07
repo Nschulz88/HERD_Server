@@ -61,17 +61,28 @@ app.post('/organizers', (req, res) => {
 })
 
 app.post('/volunteers', (req, res) => {
-  console.log("posted to volunteers!")
-  console.log(req.body)
+  console.log("posted to volunteers!");
+  console.log(req.body);
   knex('volunteers')
-    .insert({
-      vol_name        :req.body.full_name,
-      vol_email       :req.body.username,
-      vol_password    :req.body.unhashed_pass,
-    }).then(volunteers => {
-      res.json(volunteers)
-    }).catch(err =>{
-      throw err
+    .select('*')
+    .where({
+      vol_email: req.body.username
+    })
+    .then(match => {
+      if (match.length >= 1){
+        console.log('email already entered')
+      } else {
+        knex('volunteers')
+          .insert({
+            vol_name        :req.body.full_name,
+            vol_email       :req.body.username,
+            vol_password    :req.body.unhashed_pass,
+          }).then(volunteers => {
+            res.json(volunteers);
+          }).catch(err =>{
+            throw err;
+          })
+      }
     })
 })
 
