@@ -11,6 +11,7 @@ const PORT = normalizePort(process.env.PORT || 5000);
 const ENV = process.env.ENV || "development";
 const app = express();
 const dev = app.get('env') !== 'production';
+
 const bodyParser  = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json({}));
@@ -33,14 +34,16 @@ app.use(cookieSession({
 app.use(express.static('public'));
 app.use(knexLogger(knex));
 
-app.get('/volunteers', (req, res) => {
-  console.log("volunteers");
-  knex('volunteers')
+app.get('/events/:id', (req, res) => {
+  console.log(req.params.id)
+  knex('events')
     .select('*')
-    .then(volunteers => {
-      res.json(volunteers);
-    });
-});
+    .where({
+      id : req.params.id
+    }).then(event =>{
+      res.json(event)
+    })
+})
 
 app.get('/organizers', (req, res) => {
   console.log("organizers");
@@ -80,6 +83,15 @@ app.post('/organizers', (req, res) => {
       throw err
     })
 })
+
+app.get('/volunteers', (req, res) => {
+  console.log("volunteers");
+  knex('volunteers')
+    .select('*')
+    .then(volunteers => {
+      res.json(volunteers);
+    });
+});
 
 app.post('/volunteers', (req, res) => {
   console.log("posted to volunteers!");
