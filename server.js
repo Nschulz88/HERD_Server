@@ -146,6 +146,17 @@ app.get('/events', (req, res) => {
     // });
 });
 
+app.get('/events/:id', (req, res) => {
+  console.log(req.params.id)
+  knex('events')
+    .select('*')
+    .where({
+      id : req.params.id
+    }).then(event =>{
+      res.json(event)
+    })
+}) 
+
 app.listen(3001);
 
 const server = createServer(app);
