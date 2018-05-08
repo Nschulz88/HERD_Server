@@ -208,8 +208,10 @@ app.post('/events', (req, res) => {
 app.get('/events', (req, res) => {
   console.log("events");
   console.log(req.session)
+  let today = new Date()
   knex('events')
     .select('*')
+    .where('event_date', '>=', today)
     .then(allEvents => {
       res.json(allEvents)
     })
@@ -224,7 +226,7 @@ app.get('/events/:id', (req, res) => {
     }).then(event =>{
       res.json(event)
     })
-}) 
+})
 
 app.listen(3001);
 
