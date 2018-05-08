@@ -122,13 +122,21 @@ app.post('/volunteers', (req, res) => {
         console.log('email already entered')
       } else {
         knex('volunteers')
+          .returning('id')
           .insert({
             vol_name        :req.body.full_name,
             vol_email       :req.body.username,
             vol_password    :bcrypt.hashSync(req.body.unhashed_pass, 10),
-          }).then(volunteers => {
-            res.json(volunteers);
-          }).catch(err =>{
+          })
+          .then(id => {
+            console.log(typeof id[0]);
+            req.session.user_id = id[0];
+            req.session.vol_org = 'volunteer';
+            console.log('login as vol should set cookie');
+            console.log(req.session);
+            res.json(id);
+          })
+          .catch(err =>{
             throw err;
           })
       }
