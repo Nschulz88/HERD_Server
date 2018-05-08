@@ -34,14 +34,30 @@ app.use(cookieSession({
 app.use(express.static('public'));
 app.use(knexLogger(knex));
 
+app.get('/volunteers/:id')
+
 app.get('/events/:id', (req, res) => {
-  console.log(req.params.id)
+  console.log(req.params.id);
   knex('events')
     .select('*')
     .where({
       id : req.params.id
-    }).then(event =>{
+    })
+    .then(event =>{
       res.json(event)
+    })
+})
+
+app.post('/events/:id', (req, res) =>{
+  const id = req.params.id;
+  const vol = req.session.user_id;
+  knex('vol_events')
+    .insert({
+      vol_id    : vol,
+      event_id  : id
+    })
+    .then(join =>{
+      res.json(join)
     })
 })
 
