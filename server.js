@@ -10,16 +10,22 @@ const normalizePort = port => parseInt(port, 10);
 const PORT = normalizePort(process.env.PORT || 5000);
 const ENV = process.env.ENV || "development";
 const app = express();
-const dev = app.get('env') !== 'production'
+const dev = app.get('env') !== 'production';
+
 const bodyParser  = require("body-parser");
-app.use(bodyParser.urlencoded({extended: true}))
-app.use(bodyParser.json({}))
+app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.json({}));
 
 const knexConfig  = require("./knexfile");
 const knex        = require("knex")(knexConfig[ENV]);
 const knexLogger  = require('knex-logger');
 
-const bcrypt = require('bcrypt')
+const bcrypt = require('bcrypt');
+const cookieSession = require('cookie-session')
+app.use(cookieSession({
+  name: 'session',
+  keys: ['yaherd'],
+}))
 
 // Log knex SQL queries to STDOUT as well
 
@@ -28,14 +34,16 @@ const bcrypt = require('bcrypt')
 app.use(express.static('public'));
 app.use(knexLogger(knex));
 
-app.get('/volunteers', (req, res) => {
-  console.log("volunteers");
-  knex('volunteers')
+app.get('/events/:id', (req, res) => {
+  console.log(req.params.id)
+  knex('events')
     .select('*')
-    .then(volunteers => {
-      res.json(volunteers);
-    });
-});
+    .where({
+      id : req.params.id
+    }).then(event =>{
+      res.json(event)
+    })
+})
 
 app.get('/organizers', (req, res) => {
   console.log("organizers");
@@ -48,7 +56,7 @@ app.get('/organizers', (req, res) => {
 
 app.post('/organizers', (req, res) => {
   console.log("posted to organizers!")
-  console.log(req.body)
+  console.log(req.body.user_id)
   knex('organizers')
     .select('*')
     .where({
@@ -56,7 +64,7 @@ app.post('/organizers', (req, res) => {
     })
     .then(match => {
       if (match.length >= 1){
-        console.log('email already entered')
+        console.log('email already entered');
       } else {
         knex('organizers')
           .insert({
@@ -75,6 +83,15 @@ app.post('/organizers', (req, res) => {
       throw err
     })
 })
+
+app.get('/volunteers', (req, res) => {
+  console.log("volunteers");
+  knex('volunteers')
+    .select('*')
+    .then(volunteers => {
+      res.json(volunteers);
+    });
+});
 
 app.post('/volunteers', (req, res) => {
   console.log("posted to volunteers!");
@@ -106,7 +123,7 @@ app.post('/volunteers', (req, res) => {
 })
 
 app.post('/login', (req, res) => {
-  console.log(req.body)
+  console.log(req.body);
   if (req.body.vol_org === 'vol'){
     knex('volunteers')
       .select('*')
@@ -114,8 +131,14 @@ app.post('/login', (req, res) => {
         vol_email     : req.body.username
       })
       .then(volunteer => {
-        bcrypt.compare(req.body.password, volunteer[0].vol_password, function(err, res) {
-          console.log(res)
+        bcrypt.compare(req.body.password, volunteer[0].vol_password, function(err, result) {
+          if(result === true){
+            req.session.user_id = volunteer[0].id;
+            req.session.vol_org = 'volunteer';
+            res.json({});
+          } else {
+            res.status(401).json({});
+          }
         });
       })
       .catch(err =>{
@@ -128,8 +151,15 @@ app.post('/login', (req, res) => {
         organizer_email     : req.body.username
       })
       .then(organizer => {
-        bcrypt.compare(req.body.password, organizer[0].organizer_password, function(err, res) {
-          console.log(res)
+        bcrypt.compare(req.body.password, organizer[0].organizer_password, function(err, result) {
+          if(result === true){
+            console.log(organizer)
+            req.session.user_id = organizer[0].id;
+            req.session.vol_org = 'organizer';
+            res.json({});
+          } else {
+            res.status(401).json({});
+          }
         })
       })
       .catch(err =>{
@@ -160,20 +190,12 @@ app.post('/events', (req, res) => {
 
 app.get('/events', (req, res) => {
   console.log("events");
+  console.log(req.session)
   knex('events')
     .select('*')
     .then(allEvents => {
       res.json(allEvents)
     })
-    // .join('vol_events', 'vol_events.vol_id', '=', 'volunteers.id')
-    // .join('events', 'vol_events.event_id', '=', 'events.id')
-    // .select('*')
-    // .then(relevantVolunteers => {
-    //   relevantVolunteers.forEach((e) => {
-    //     console.log(`${e.vol_name} has volunteered to go ${e.event_description}`)
-    //   })
-    //   res.json(relevantVolunteers);
-    // });
 });
 
 app.listen(3001);
