@@ -180,7 +180,8 @@ app.post('/events', (req, res) => {
       criteria            :req.body.criteria,
       event_date          :req.body.event_date,
       event_time          :req.body.event_time,
-      duration            :req.body.duration
+      duration            :req.body.duration,
+      organizer_id        :req.session.user_id
     }).then(organizers => {
       res.json(organizers)
     }).catch(err =>{
