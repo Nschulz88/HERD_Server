@@ -159,7 +159,9 @@ app.post('/login', (req, res) => {
           if(result === true){
             req.session.user_id = volunteer[0].id;
             req.session.vol_org = 'volunteer';
-            res.json({});
+            delete volunteer[0].vol_password;
+            volunteer[0].vol_org = 'volunteer';
+            res.json({user: volunteer[0]});
           } else {
             res.status(401).json({});
           }
@@ -177,10 +179,13 @@ app.post('/login', (req, res) => {
       .then(organizer => {
         bcrypt.compare(req.body.password, organizer[0].organizer_password, function(err, result) {
           if(result === true){
+            console.log("ORGANIZER PASSWORDS MATCHED!")
             console.log(organizer)
             req.session.user_id = organizer[0].id;
             req.session.vol_org = 'organizer';
-            res.json({});
+            delete organizer[0].organizer_password;
+            organizer[0].vol_org = 'organizer';
+            res.json({user: organizer[0]});
           } else {
             res.status(401).json({});
           }
