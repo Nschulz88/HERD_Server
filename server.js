@@ -192,6 +192,13 @@ app.post('/login', (req, res) => {
   }
 })
 
+app.post('/logout', (req, res) => {
+  console.log("getting to server endpoint")
+  req.session = null;
+  return res.status(200).json({});
+});
+
+
 app.post('/events', (req, res) => {
   console.log("posted to events!")
   console.log(req.body)
