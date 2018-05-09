@@ -3,12 +3,12 @@
 
 This project uses Node.js, React, Bootstrap, and CSS on the front end using Axios to make ajax calls to an Express server on the backend with a PostgreSQL database
 
-##Important
+## Important
 This project consists of two seperate github repos:
 [Client Repo](https://github.com/Nschulz88/HERD_Client)
 [Server Repo](https://github.com/Nschulz88/HERD_Server)
 
-##Running the project from Github
+## Running the project from Github
 1. Clone each repository
 2. In separate terminal windows use command "npm install" to install all dependencies for Client and Server.
 3. In the Server terminal window use command "knex:migrate latest" to structure the database.
