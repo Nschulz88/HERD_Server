@@ -2,6 +2,9 @@ require('dotenv').config();
 
 const {createServer} = require('http');
 const express = require('express');
+const corsPrefetch = require('cors-prefetch-middleware');
+console.log(corsPrefetch)
+const imagesUpload = require('images-upload-middleware');
 const compression = require('compression');
 // const morgan = require('morgan');
 const path = require('path');
@@ -13,8 +16,10 @@ const app = express();
 const dev = app.get('env') !== 'production';
 
 const bodyParser  = require("body-parser");
+app.use('/static', express.static('./static'));
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json({}));
+app.use(corsPrefetch.default);
 
 const knexConfig  = require("./knexfile");
 const knex        = require("knex")(knexConfig[ENV]);
@@ -248,8 +253,12 @@ app.get('/events/:id', (req, res) => {
     })
 })
 
-app.listen(3001);
+app.post('/notmultiple', imagesUpload.default(
+    './static/files',
+    'http://localhost:3001/static/files'
+));
 
+app.listen(3001);
 const server = createServer(app);
 
 server.listen(PORT, err => {
