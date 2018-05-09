@@ -129,11 +129,8 @@ app.post('/volunteers', (req, res) => {
             vol_password    :bcrypt.hashSync(req.body.unhashed_pass, 10),
           })
           .then(id => {
-            console.log(typeof id[0]);
             req.session.user_id = id[0];
             req.session.vol_org = 'volunteer';
-            console.log('login as vol should set cookie');
-            console.log(req.session);
             res.json(id);
           })
           .catch(err =>{
