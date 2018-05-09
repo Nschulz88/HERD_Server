@@ -16,3 +16,8 @@ This project consists of two seperate github repos:
 5. In the Server terminal window use command "node server.js to run the database.
 6. In the Client terminal window use command "npm run start" to begin the app.
 7. The app will open automatically on your browser.
+
+## Contributors
+[Sam Schantz](https://github.com/samvschantz)
+[Natalie Schulz](https://github.com/Nschulz88)
+[Dominic Bartlomowicz](https://github.com/Dominic-Bartlomowicz)
