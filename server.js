@@ -3,15 +3,14 @@ require('dotenv').config();
 const {createServer} = require('http');
 const express = require('express');
 const corsPrefetch = require('cors-prefetch-middleware');
-console.log(corsPrefetch)
 const imagesUpload = require('images-upload-middleware');
 const compression = require('compression');
 // const morgan = require('morgan');
 const path = require('path');
 
 const normalizePort = port => parseInt(port, 10);
-const PORT = normalizePort(process.env.PORT || 5000);
-const ENV = process.env.ENV || "production";
+const PORT = normalizePort(process.env.PORT || 3001);
+const ENV = process.env.NODE_ENV || "development";
 const app = express();
 const dev = app.get('env') !== 'production';
 
@@ -258,11 +257,18 @@ app.post('/notmultiple', imagesUpload.default(
     'http://localhost:3001/static/files'
 ));
 
-app.listen(3001);
+app.get('*', (req, res) => {
+  console.log('YOLO')
+  res.sendFile('index.html', { root : __dirname+'/build'});
+});
+
+// app.listen(3001);
 const server = createServer(app);
 
 server.listen(PORT, err => {
   if (err) throw err;
 
   console.log('Server started, yeyyy!');
+  console.dir(process.env.NODE_ENV);
+  console.dir(process.env.DATABASE_URL);
 })
