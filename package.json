@@ -25,8 +25,8 @@
     "wget": "0.0.1"
   },
   "scripts": {
-    "start": "(cd HERD_Client && react-scripts start)",
-    "build": "react-scripts build && cp -a ./build/* ../friends_server/public/",
+    "start": "node server.js",
+    "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
   }
