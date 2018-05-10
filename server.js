@@ -258,10 +258,6 @@ app.post('/notmultiple', imagesUpload.default(
     'http://localhost:3001/static/files'
 ));
 
-app.get('*', (req, res) => {
-  res.sendFile('index.html', { root : __dirname+'/build'});
-});
-
 app.listen(3001);
 const server = createServer(app);
 
