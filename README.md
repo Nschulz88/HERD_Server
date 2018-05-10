@@ -3,6 +3,12 @@
 
 This project uses Node.js, React, Bootstrap, and CSS on the front end using Axios to make ajax calls to an Express server on the backend with a PostgreSQL database
 
+## Screenshots
+
+![Main Page](https://github.com/Nschulz88/HERD_Client/blob/master/docs/MainPage.png)
+![Slideout](https://github.com/Nschulz88/HERD_Client/blob/master/docs/SlideOut.png)
+![Forms](https://github.com/Nschulz88/HERD_Client/blob/master/docs/Forms.png)
+
 ## Important
 This project consists of two seperate github repos:
 [Client Repo](https://github.com/Nschulz88/HERD_Client)
