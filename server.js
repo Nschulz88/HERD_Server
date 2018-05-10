@@ -3,15 +3,14 @@ require('dotenv').config();
 const {createServer} = require('http');
 const express = require('express');
 const corsPrefetch = require('cors-prefetch-middleware');
-console.log(corsPrefetch)
 const imagesUpload = require('images-upload-middleware');
 const compression = require('compression');
 // const morgan = require('morgan');
 const path = require('path');
 
 const normalizePort = port => parseInt(port, 10);
-const PORT = normalizePort(process.env.PORT || 5000);
-const ENV = process.env.ENV || "development";
+const PORT = normalizePort(process.env.PORT || 3001);
+const ENV = process.env.NODE_ENV || "development";
 const app = express();
 const dev = app.get('env') !== 'production';
 
@@ -36,12 +35,12 @@ app.use(cookieSession({
 
 // app.use(morgan);
 
-app.use(express.static('public'));
 app.use(knexLogger(knex));
+app.use(express.static(path.join(__dirname, '/build')));
 
-app.get('/volunteers/:id')
+// app.get('/volunteers/:id')
 
-app.get('/events/:id', (req, res) => {
+app.get('/api/events/:id', (req, res) => {
   console.log(req.params.id);
   knex('events')
     .select('*')
@@ -53,7 +52,7 @@ app.get('/events/:id', (req, res) => {
     })
 })
 
-app.post('/events/:id', (req, res) =>{
+app.post('/api/events/:id', (req, res) =>{
   const id = req.params.id;
   const vol = req.session.user_id;
   knex('vol_events')
@@ -66,7 +65,7 @@ app.post('/events/:id', (req, res) =>{
     })
 })
 
-app.get('/organizers', (req, res) => {
+app.get('/api/organizers', (req, res) => {
   console.log("organizers");
   knex('organizers')
     .select('*')
@@ -75,7 +74,7 @@ app.get('/organizers', (req, res) => {
     });
 });
 
-app.post('/organizers', (req, res) => {
+app.post('/api/organizers', (req, res) => {
   console.log("posted to organizers!")
   console.log(req.body.user_id)
   knex('organizers')
@@ -105,7 +104,7 @@ app.post('/organizers', (req, res) => {
     })
 })
 
-app.get('/volunteers', (req, res) => {
+app.get('/api/volunteers', (req, res) => {
   console.log("volunteers");
   knex('volunteers')
     .select('*')
@@ -114,7 +113,7 @@ app.get('/volunteers', (req, res) => {
     });
 });
 
-app.post('/volunteers', (req, res) => {
+app.post('/api/volunteers', (req, res) => {
   console.log("posted to volunteers!");
   console.log(req.body);
   knex('volunteers')
@@ -151,7 +150,7 @@ app.post('/volunteers', (req, res) => {
     })
 })
 
-app.post('/login', (req, res) => {
+app.post('/api/login', (req, res) => {
   console.log(req.body);
   if (req.body.vol_org === 'vol'){
     knex('volunteers')
@@ -202,14 +201,14 @@ app.post('/login', (req, res) => {
   }
 })
 
-app.post('/logout', (req, res) => {
+app.post('/api/logout', (req, res) => {
   console.log("getting to server endpoint")
   req.session = null;
   return res.status(200).json({});
 });
 
 
-app.post('/events', (req, res) => {
+app.post('/api/events', (req, res) => {
   console.log("posted to events!")
   console.log(req.body)
   knex('events')
@@ -230,7 +229,7 @@ app.post('/events', (req, res) => {
     })
 })
 
-app.get('/events', (req, res) => {
+app.get('/api/events', (req, res) => {
   console.log("events");
   console.log(req.session)
   let today = new Date()
@@ -242,7 +241,7 @@ app.get('/events', (req, res) => {
     })
 });
 
-app.get('/events/:id', (req, res) => {
+app.get('/api/events/:id', (req, res) => {
   console.log(req.params.id)
   knex('events')
     .select('*')
@@ -258,11 +257,18 @@ app.post('/notmultiple', imagesUpload.default(
     'http://localhost:3001/static/files'
 ));
 
-app.listen(3001);
+app.get('*', (req, res) => {
+  console.log('YOLO')
+  res.sendFile('index.html', { root : __dirname+'/build'});
+});
+
+// app.listen(3001);
 const server = createServer(app);
 
 server.listen(PORT, err => {
   if (err) throw err;
 
   console.log('Server started, yeyyy!');
+  console.dir(process.env.NODE_ENV);
+  console.dir(process.env.DATABASE_URL);
 })
