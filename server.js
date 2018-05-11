@@ -81,7 +81,7 @@ app.post('/api/register/organizers', (req, res) => {
   knex('organizers')
     .select('*')
     .where({
-      organizer_email: req.body.username
+      organizer_email: req.body.email
     })
     .then(match => {
       if (match.length >= 1){
@@ -92,14 +92,14 @@ app.post('/api/register/organizers', (req, res) => {
           .insert({
             organization_name     :req.body.organization,
             organizer_name        :req.body.full_name,
-            organizer_email       :req.body.username,
+            organizer_email       :req.body.email,
             organizer_password    :bcrypt.hashSync(req.body.unhashed_pass, 10),
           }).then(id => {
             req.session.user_id = id[0];
             req.session.vol_org = 'organizer';
             console.log('login as organizer should set cookie');
             console.log(req.session);
-            res.json(id);
+            res.json({user: id[0]});
           }).catch(err =>{
             console.error
           })
@@ -141,7 +141,7 @@ app.post('/api/register/volunteers', (req, res) => {
             req.session.vol_org = 'volunteer';
             console.log('login as vol should set cookie');
             console.log(req.session);
-            res.json(id);
+            res.json({user: id[0]});
           })
           .catch(err =>{
             throw err;

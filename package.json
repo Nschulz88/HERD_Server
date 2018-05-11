@@ -9,6 +9,8 @@
     "compression": "^1.7.2",
     "cookie-parser": "^1.4.3",
     "cookie-session": "^2.0.0-beta.3",
+    "cors-prefetch-middleware": "^1.0.0",
+    "images-upload-middleware": "^1.1.1",
     "dotenv": "^5.0.1",
     "dotenv-expand": "^4.2.0",
     "express": "^4.16.3",
