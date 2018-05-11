@@ -99,7 +99,7 @@ app.post('/api/register/organizers', (req, res) => {
             req.session.vol_org = 'organizer';
             console.log('login as organizer should set cookie');
             console.log(req.session);
-            res.json(id);
+            res.json({user: id[0]});
           }).catch(err =>{
             console.error
           })
@@ -141,7 +141,7 @@ app.post('/api/register/volunteers', (req, res) => {
             req.session.vol_org = 'volunteer';
             console.log('login as vol should set cookie');
             console.log(req.session);
-            res.json(id);
+            res.json({user: id[0]});
           })
           .catch(err =>{
             throw err;
