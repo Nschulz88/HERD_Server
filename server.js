@@ -81,7 +81,7 @@ app.post('/api/register/organizers', (req, res) => {
   knex('organizers')
     .select('*')
     .where({
-      organizer_email: req.body.email
+      email: req.body.email
     })
     .then(match => {
       if (match.length >= 1){
@@ -91,9 +91,9 @@ app.post('/api/register/organizers', (req, res) => {
           .returning('id')
           .insert({
             organization_name     :req.body.organization,
-            organizer_name        :req.body.full_name,
-            organizer_email       :req.body.email,
-            organizer_password    :bcrypt.hashSync(req.body.unhashed_pass, 10),
+            name        :req.body.full_name,
+            email       :req.body.email,
+            password    :bcrypt.hashSync(req.body.unhashed_pass, 10),
           }).then(id => {
             req.session.user_id = id[0];
             req.session.vol_org = 'organizer';
@@ -122,7 +122,7 @@ app.post('/api/register/volunteers', (req, res) => {
   knex('volunteers')
     .select('*')
     .where({
-      vol_email: req.body.username
+      email: req.body.email
     })
     .then(match => {
       if (match.length >= 1){
@@ -131,9 +131,9 @@ app.post('/api/register/volunteers', (req, res) => {
         knex('volunteers')
           .returning('id')
           .insert({
-            vol_name        :req.body.full_name,
-            vol_email       :req.body.username,
-            vol_password    :bcrypt.hashSync(req.body.unhashed_pass, 10),
+            name        :req.body.full_name,
+            email       :req.body.email,
+            password    :bcrypt.hashSync(req.body.unhashed_pass, 10),
           })
           .then(id => {
             console.log(typeof id[0]);
@@ -159,14 +159,14 @@ app.post('/api/login', (req, res) => {
     knex('volunteers')
       .select('*')
       .where({
-        vol_email     : req.body.username
+        email     : req.body.email
       })
       .then(volunteer => {
-        bcrypt.compare(req.body.password, volunteer[0].vol_password, function(err, result) {
+        bcrypt.compare(req.body.password, volunteer[0].password, function(err, result) {
           if(result === true){
             req.session.user_id = volunteer[0].id;
             req.session.vol_org = 'volunteer';
-            delete volunteer[0].vol_password;
+            delete volunteer[0].password;
             volunteer[0].vol_org = 'volunteer';
             res.json({user: volunteer[0]});
           } else {
@@ -181,16 +181,16 @@ app.post('/api/login', (req, res) => {
     knex('organizers')
       .select('*')
       .where({
-        organizer_email     : req.body.username
+        email     : req.body.email
       })
       .then(organizer => {
-        bcrypt.compare(req.body.password, organizer[0].organizer_password, function(err, result) {
+        bcrypt.compare(req.body.password, organizer[0].password, function(err, result) {
           if(result === true){
             console.log("ORGANIZER PASSWORDS MATCHED!")
             console.log(organizer)
             req.session.user_id = organizer[0].id;
             req.session.vol_org = 'organizer';
-            delete organizer[0].organizer_password;
+            delete organizer[0].password;
             organizer[0].vol_org = 'organizer';
             res.json({user: organizer[0]});
           } else {
