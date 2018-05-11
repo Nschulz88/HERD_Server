@@ -75,6 +75,7 @@ app.get('/api/organizers', (req, res) => {
     });
 });
 
+// If logged in, shows name, error handling for name or organizer for email registered
 app.post('/api/register/organizers', (req, res) => {
   console.log("posted to organizers!")
   console.log(req.body)
@@ -105,6 +106,20 @@ app.post('/api/register/organizers', (req, res) => {
           })
         }
     })
+})
+
+app.get('/api/volunteers/:id', (req, res) => {
+  console.log("volunteer id endpoint hit");
+  console.log(req.params);
+  knex('volunteers')
+    .select('*')
+    .where({
+      id: 2
+    })
+    .then(volunteers => {
+      console.log(volunteers);
+      res.json(volunteers);
+    });
 })
 
 app.get('/api/volunteers', (req, res) => {
