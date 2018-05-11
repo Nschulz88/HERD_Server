@@ -81,7 +81,7 @@ app.post('/api/register/organizers', (req, res) => {
   knex('organizers')
     .select('*')
     .where({
-      email: req.body.username
+      email: req.body.email
     })
     .then(match => {
       if (match.length >= 1){
@@ -92,7 +92,7 @@ app.post('/api/register/organizers', (req, res) => {
           .insert({
             organization_name     :req.body.organization,
             name        :req.body.full_name,
-            email       :req.body.username,
+            email       :req.body.email,
             password    :bcrypt.hashSync(req.body.unhashed_pass, 10),
           }).then(id => {
             req.session.user_id = id[0];
@@ -122,7 +122,7 @@ app.post('/api/register/volunteers', (req, res) => {
   knex('volunteers')
     .select('*')
     .where({
-      email: req.body.username
+      email: req.body.email
     })
     .then(match => {
       if (match.length >= 1){
@@ -132,7 +132,7 @@ app.post('/api/register/volunteers', (req, res) => {
           .returning('id')
           .insert({
             name        :req.body.full_name,
-            email       :req.body.username,
+            email       :req.body.email,
             password    :bcrypt.hashSync(req.body.unhashed_pass, 10),
           })
           .then(id => {
@@ -159,7 +159,7 @@ app.post('/api/login', (req, res) => {
     knex('volunteers')
       .select('*')
       .where({
-        email     : req.body.username
+        email     : req.body.email
       })
       .then(volunteer => {
         bcrypt.compare(req.body.password, volunteer[0].password, function(err, result) {
@@ -181,7 +181,7 @@ app.post('/api/login', (req, res) => {
     knex('organizers')
       .select('*')
       .where({
-        email     : req.body.username
+        email     : req.body.email
       })
       .then(organizer => {
         bcrypt.compare(req.body.password, organizer[0].password, function(err, result) {
