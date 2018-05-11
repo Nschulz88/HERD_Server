@@ -76,10 +76,9 @@ app.get('/api/organizers', (req, res) => {
 });
 
 // If logged in, shows name, error handling for name or organizer for email registered
-
-app.post('/api/organizers', (req, res) => {
+app.post('/api/register/organizers', (req, res) => {
   console.log("posted to organizers!")
-  console.log(req.body.user_id)
+  console.log(req.body)
   knex('organizers')
     .select('*')
     .where({
@@ -90,20 +89,22 @@ app.post('/api/organizers', (req, res) => {
         console.log('email already entered');
       } else {
         knex('organizers')
+          .returning('id')
           .insert({
             organization_name     :req.body.organization,
             organizer_name        :req.body.full_name,
             organizer_email       :req.body.username,
             organizer_password    :bcrypt.hashSync(req.body.unhashed_pass, 10),
-          }).then(organizers => {
-            res.json(organizers)
+          }).then(id => {
+            req.session.user_id = id[0];
+            req.session.vol_org = 'organizer';
+            console.log('login as organizer should set cookie');
+            console.log(req.session);
+            res.json(id);
           }).catch(err =>{
-            throw err
+            console.error
           })
-      }
-    })
-    .catch(err =>{
-      throw err
+        }
     })
 })
 
@@ -130,7 +131,7 @@ app.get('/api/volunteers', (req, res) => {
     });
 });
 
-app.post('/api/volunteers', (req, res) => {
+app.post('/api/register/volunteers', (req, res) => {
   console.log("posted to volunteers!");
   console.log(req.body);
   knex('volunteers')
@@ -189,7 +190,7 @@ app.post('/api/login', (req, res) => {
         });
       })
       .catch(err =>{
-        throw err
+        console.error
       })
   } else {
     knex('organizers')
@@ -273,6 +274,10 @@ app.post('/notmultiple', imagesUpload.default(
     './static/files',
     'http://localhost:3001/static/files'
 ));
+
+app.get('*', (req, res) => {
+  res.sendFile('index.html', { root : __dirname+'/build'});
+});
 
 app.listen(3001);
 const server = createServer(app);
