@@ -11,7 +11,7 @@ const path = require('path');
 
 const normalizePort = port => parseInt(port, 10);
 const PORT = normalizePort(process.env.PORT || 5000);
-const ENV = process.env.ENV || "production";
+const ENV = process.env.ENV || "development";
 const app = express();
 const dev = app.get('env') !== 'production';
 
@@ -75,6 +75,8 @@ app.get('/api/organizers', (req, res) => {
     });
 });
 
+// If logged in, shows name, error handling for name or organizer for email registered
+
 app.post('/api/organizers', (req, res) => {
   console.log("posted to organizers!")
   console.log(req.body.user_id)
@@ -103,6 +105,20 @@ app.post('/api/organizers', (req, res) => {
     .catch(err =>{
       throw err
     })
+})
+
+app.get('/api/volunteers/:id', (req, res) => {
+  console.log("volunteer id endpoint hit");
+  console.log(req.params);
+  knex('volunteers')
+    .select('*')
+    .where({
+      id: 2
+    })
+    .then(volunteers => {
+      console.log(volunteers);
+      res.json(volunteers);
+    });
 })
 
 app.get('/api/volunteers', (req, res) => {
