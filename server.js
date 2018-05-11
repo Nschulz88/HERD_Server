@@ -2,6 +2,7 @@ require('dotenv').config();
 
 const {createServer} = require('http');
 const express = require('express');
+const fs = require('fs');
 const corsPrefetch = require('cors-prefetch-middleware');
 console.log(corsPrefetch)
 const imagesUpload = require('images-upload-middleware');
@@ -27,6 +28,33 @@ const knexLogger  = require('knex-logger');
 
 const bcrypt = require('bcrypt');
 const cookieSession = require('cookie-session')
+
+const AWS = require('aws-sdk');
+AWS.config.loadFromPath('./config.json');
+var s3 = new AWS.S3();
+var filePath = "./static/files/img.png";
+
+var myBucket = 'profilepics-herd';
+var myKey = 'static/image';
+
+var params = {
+  Bucket: myBucket,
+  Body : fs.createReadStream(filePath),
+  Key : myKey
+};
+
+s3.upload(params, function (err, data) {
+  //handle error
+  if (err) {
+    console.log("Error", err);
+  }
+
+  //success
+  if (data) {
+    console.log("Uploaded in:", data.Location);
+  }
+});
+
 app.use(cookieSession({
   name: 'session',
   keys: ['yaherd'],
