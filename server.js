@@ -89,12 +89,15 @@ app.use(express.static(path.join(__dirname, '/build')));
 
 app.get('/api/events/:id', (req, res) => {
   console.log(req.params.id);
+  console.log(req.session.user_id)
   knex('events')
     .select('*')
     .where({
-      id : req.params.id
+      event_id : req.params.id
     })
+    .join('vol_events', 'events.id', 'vol_events.event_id')
     .then(event =>{
+      console.log(event)
       res.json(event)
     })
 })
