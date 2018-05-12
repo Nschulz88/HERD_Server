@@ -2,8 +2,9 @@ require('dotenv').config();
 
 const {createServer} = require('http');
 const express = require('express');
+const fs = require('fs');
+const multer = require('multer');
 const corsPrefetch = require('cors-prefetch-middleware');
-console.log(corsPrefetch)
 const imagesUpload = require('images-upload-middleware');
 const compression = require('compression');
 // const morgan = require('morgan');
@@ -27,6 +28,52 @@ const knexLogger  = require('knex-logger');
 
 const bcrypt = require('bcrypt');
 const cookieSession = require('cookie-session')
+
+const AWS = require('aws-sdk');
+var s3 = new AWS.S3();
+AWS.config.loadFromPath('./config.json');
+
+var myBucket = 'profilepics-herd';
+var myKey = 'static/image';
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+});
+
+console.log(upload);
+
+app.post('/api/upload', upload.single('profilepic'), (req, res) => {
+  console.log("EYYYYYY");
+
+  req.pause();
+
+  console.log(req.file);
+
+  var params = {
+    Bucket: myBucket,
+    Key : myKey,
+    ACL: 'public-read',
+    Body: req.file.buffer,
+  };
+
+  s3.upload(params, function (err, data) {
+    //handle error
+    if (err) {
+      console.log("Error", err);
+    }
+    //success
+    else{
+      console.log('File uploaded to s3');
+    }
+  })
+});
+
+
+// app.post('/notmultiple', imagesUpload.default(
+//     './static/files',
+//     'https://s3.console.aws.amazon.com/s3/buckets/profilepics-herd'
+// ));
+
 app.use(cookieSession({
   name: 'session',
   keys: ['yaherd'],
@@ -35,11 +82,10 @@ app.use(cookieSession({
 // Log knex SQL queries to STDOUT as well
 
 // app.use(morgan);
-
 app.use(knexLogger(knex));
 app.use(express.static(path.join(__dirname, '/build')));
-
 // app.get('/volunteers/:id')
+
 
 app.get('/api/events/:id', (req, res) => {
   console.log(req.params.id);
@@ -75,6 +121,7 @@ app.get('/api/organizers', (req, res) => {
     });
 });
 
+// If logged in, shows name, error handling for name or organizer for email registered
 app.post('/api/register/organizers', (req, res) => {
   console.log("posted to organizers!")
   console.log(req.body)
@@ -105,6 +152,20 @@ app.post('/api/register/organizers', (req, res) => {
           })
         }
     })
+})
+
+app.get('/api/volunteers/:id', (req, res) => {
+  console.log("volunteer id endpoint hit");
+  console.log(req.params);
+  knex('volunteers')
+    .select('*')
+    .where({
+      id: 2
+    })
+    .then(volunteers => {
+      console.log(volunteers);
+      res.json(volunteers);
+    });
 })
 
 app.get('/api/volunteers', (req, res) => {
@@ -254,11 +315,6 @@ app.get('/api/events/:id', (req, res) => {
       res.json(event)
     })
 })
-
-app.post('/notmultiple', imagesUpload.default(
-    './static/files',
-    'http://localhost:3001/static/files'
-));
 
 app.get('*', (req, res) => {
   res.sendFile('index.html', { root : __dirname+'/build'});
