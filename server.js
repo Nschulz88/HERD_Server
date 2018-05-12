@@ -294,6 +294,17 @@ app.post('/api/events', (req, res) => {
     })
 })
 
+app.get('/api/rsvps/:id', (req, res) => {
+  console.log('endpoint hit')
+  knex('vol_events')
+    .select('*')
+    .where('event_id', '=', req.params.id)
+    .then(response =>{
+      res.json(response)
+      console.log(response)
+    })
+})
+
 app.get('/api/events', (req, res) => {
   console.log("events");
   console.log(req.session)
@@ -301,8 +312,10 @@ app.get('/api/events', (req, res) => {
   knex('events')
     .select('*')
     .where('event_date', '>=', today)
-    .then(allEvents => {
-      res.json(allEvents)
+    //.fullOuterJoin('vol_events', 'events.id', 'vol_events.event_id')
+    .then(organizers => {
+      console.log(organizers)
+      res.json(organizers)
     })
 });
 
