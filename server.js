@@ -85,21 +85,22 @@ app.post('/api/register/organizers', (req, res) => {
     })
     .then(match => {
       if (match.length >= 1){
-        console.log('email already entered');
+        console.log('email already entered'); // in this case we need to send info back to front end to show falash message!!!
       } else {
         knex('organizers')
-          .returning('id')
+          .returning('*')
           .insert({
             organization_name     :req.body.organization,
             name        :req.body.full_name,
             email       :req.body.email,
             password    :bcrypt.hashSync(req.body.unhashed_pass, 10),
-          }).then(id => {
-            req.session.user_id = id[0];
+          }).then(response => {
+            console.log("RESPONSEEEEEEE", response)
+            req.session.user_id = response[0].id;
             req.session.vol_org = 'organizer';
-            console.log('login as organizer should set cookie');
+            console.log('registration of organizer, send back data to front', );
             console.log(req.session);
-            res.json({user: id[0]});
+            res.json({user: response[0]});  // this is not sending to FRONT!!!!
           }).catch(err =>{
             console.error
           })
