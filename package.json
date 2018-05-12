@@ -15,7 +15,6 @@
     "dotenv-expand": "^4.2.0",
     "express": "^4.16.3",
     "heroku": "^7.0.22",
-    "images-upload-middleware": "^1.1.1",
     "knex": "^0.14.6",
     "knex-logger": "^0.1.0",
     "morgan": "^1.9.0",

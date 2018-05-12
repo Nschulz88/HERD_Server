@@ -239,8 +239,10 @@ app.get('/api/events', (req, res) => {
   knex('events')
     .select('*')
     .where('event_date', '>=', today)
-    .then(allEvents => {
-      res.json(allEvents)
+    .leftJoin('vol_events', 'events.id', 'vol_events.event_id')
+    .then(organizers => {
+      console.log(organizers)
+      res.json(organizers)
     })
 });
 
