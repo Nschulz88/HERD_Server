@@ -3,8 +3,8 @@ require('dotenv').config();
 const {createServer} = require('http');
 const express = require('express');
 const fs = require('fs');
+const multer = require('multer');
 const corsPrefetch = require('cors-prefetch-middleware');
-console.log(corsPrefetch)
 const imagesUpload = require('images-upload-middleware');
 const compression = require('compression');
 // const morgan = require('morgan');
@@ -30,30 +30,52 @@ const bcrypt = require('bcrypt');
 const cookieSession = require('cookie-session')
 
 const AWS = require('aws-sdk');
-AWS.config.loadFromPath('./config.json');
 var s3 = new AWS.S3();
-var filePath = "./static/files/img.png";
+AWS.config.loadFromPath('./config.json');
 
 var myBucket = 'profilepics-herd';
 var myKey = 'static/image';
 
-var params = {
-  Bucket: myBucket,
-  Body : fs.createReadStream(filePath),
-  Key : myKey
-};
-
-s3.upload(params, function (err, data) {
-  //handle error
-  if (err) {
-    console.log("Error", err);
-  }
-
-  //success
-  if (data) {
-    console.log("Uploaded in:", data.Location);
-  }
+const upload = multer({
+  storage: multer.memoryStorage(),
 });
+
+console.log(upload);
+
+
+
+
+app.post('/api/upload', upload.single('profilepic'), (req, res) => {
+  console.log("EYYYYYY");
+
+  req.pause();
+
+  console.log(req.file);
+
+  var params = {
+    Bucket: myBucket,
+    Key : myKey,
+    ACL: 'public-read',
+    Body: req.file.buffer,
+  };
+
+  s3.upload(params, function (err, data) {
+    //handle error
+    if (err) {
+      console.log("Error", err);
+    }
+    //success
+    else{
+      console.log('File uploaded to s3');
+    }
+  })
+});
+
+
+// app.post('/notmultiple', imagesUpload.default(
+//     './static/files',
+//     'https://s3.console.aws.amazon.com/s3/buckets/profilepics-herd'
+// ));
 
 app.use(cookieSession({
   name: 'session',
@@ -63,11 +85,10 @@ app.use(cookieSession({
 // Log knex SQL queries to STDOUT as well
 
 // app.use(morgan);
-
 app.use(knexLogger(knex));
 app.use(express.static(path.join(__dirname, '/build')));
-
 // app.get('/volunteers/:id')
+
 
 app.get('/api/events/:id', (req, res) => {
   console.log(req.params.id);
@@ -296,11 +317,6 @@ app.get('/api/events/:id', (req, res) => {
       res.json(event)
     })
 })
-
-app.post('/notmultiple', imagesUpload.default(
-    './static/files',
-    'http://localhost:3001/static/files'
-));
 
 app.listen(3001);
 const server = createServer(app);
