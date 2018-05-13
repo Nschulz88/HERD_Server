@@ -327,11 +327,12 @@ app.post('/api/events', (req, res) => {
       event_date          :req.body.event_date,
       event_time          :req.body.event_time,
       duration            :req.body.duration,
-      organizer_id        :req.session.user_id
+      organizer_id        :req.session.user_id,
+      event_type          :req.body.event_type
     }).then(organizers => {
       res.json(organizers)
     }).catch(err =>{
-      throw err
+      console.err
     })
 });
 
