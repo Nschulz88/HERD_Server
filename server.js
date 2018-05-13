@@ -3,6 +3,7 @@ require('dotenv').config();
 const {createServer} = require('http');
 const express = require('express');
 const fs = require('fs');
+const http = require('http');
 const multer = require('multer');
 const corsPrefetch = require('cors-prefetch-middleware');
 const imagesUpload = require('images-upload-middleware');
@@ -33,25 +34,36 @@ const AWS = require('aws-sdk');
 var s3 = new AWS.S3();
 AWS.config.loadFromPath('./config.json');
 
-var myBucket = 'profilepics-herd';
-var myKey = 'static/image';
-
 const upload = multer({
   storage: multer.memoryStorage(),
 });
 
 console.log(upload);
 
+function downloadFile(absoluteUrl) {
+ var link = document.createElement('a');
+ link.href = absoluteUrl;
+ link.download = 'true';
+ document.body.appendChild(link);
+ link.click();
+ document.body.removeChild(link);
+};
+
+
+
 app.post('/api/upload', upload.single('profilepic'), (req, res) => {
   console.log("EYYYYYY");
 
-  req.pause();
-
   console.log(req.file);
 
+  var number = Math.floor(Math.random() * 10000000);
+  var str = number.toString();
+
+  "https://s3-us-west-2.amazonaws.com/profilepics-herd/+ "
+
   var params = {
-    Bucket: myBucket,
-    Key : myKey,
+    Bucket: 'profilepics-herd',
+    Key : str,
     ACL: 'public-read',
     Body: req.file.buffer,
   };
@@ -66,18 +78,27 @@ app.post('/api/upload', upload.single('profilepic'), (req, res) => {
       console.log('File uploaded to s3');
     }
   })
+
+  var params = {
+    Bucket: 'profilepics-herd',
+    Key: str,
+    ACL: 'public-read',
+    ContentLanguage: 'STRING_VALUE',
+    ContentType: 'STRING_VALUE',
+  };
+  s3.createMultipartUpload(params, function(err, data) {
+    if (err) {console.log(err, err.stack); // an error occurred
+    } else {
+      console.log(data);
+    } // successful response
+  });
 });
 
-
-// app.post('/notmultiple', imagesUpload.default(
-//     './static/files',
-//     'https://s3.console.aws.amazon.com/s3/buckets/profilepics-herd'
-// ));
 
 app.use(cookieSession({
   name: 'session',
   keys: ['yaherd'],
-}))
+}));
 
 // Log knex SQL queries to STDOUT as well
 
@@ -100,7 +121,7 @@ app.get('/api/events/:id', (req, res) => {
       console.log(event)
       res.json(event)
     })
-})
+});
 
 app.post('/api/events/:id', (req, res) =>{
   const event = req.params.id;
@@ -116,7 +137,7 @@ app.post('/api/events/:id', (req, res) =>{
     .then(join =>{
       res.json(join)
     })
-})
+});
 
 app.get('/api/organizers', (req, res) => {
   console.log("organizers");
@@ -159,7 +180,7 @@ app.post('/api/register/organizers', (req, res) => {
           })
         }
     })
-})
+});
 
 app.get('/api/volunteers/:id', (req, res) => {
   console.log("volunteer id endpoint hit");
@@ -167,13 +188,13 @@ app.get('/api/volunteers/:id', (req, res) => {
   knex('volunteers')
     .select('*')
     .where({
-      id: 2
+      id: req.params.id
     })
     .then(volunteers => {
       console.log(volunteers);
       res.json(volunteers);
     });
-})
+});
 
 app.get('/api/volunteers', (req, res) => {
   console.log("volunteers");
@@ -219,7 +240,7 @@ app.post('/api/register/volunteers', (req, res) => {
     .catch(err =>{
       throw err;
     })
-})
+});
 
 app.post('/api/login', (req, res) => {
   console.log(req.body);
@@ -270,7 +291,7 @@ app.post('/api/login', (req, res) => {
         throw err
       })
   }
-})
+});
 
 app.post('/api/logout', (req, res) => {
   console.log("getting to server endpoint")
@@ -298,7 +319,7 @@ app.post('/api/events', (req, res) => {
     }).catch(err =>{
       throw err
     })
-})
+});
 
 app.get('/api/rsvps/:id', (req, res) => {
   console.log('endpoint hit')
@@ -309,7 +330,7 @@ app.get('/api/rsvps/:id', (req, res) => {
       res.json(response)
       console.log(response)
     })
-})
+});
 
 app.get('/api/events', (req, res) => {
   console.log("events");
@@ -334,7 +355,7 @@ app.get('/api/events/:id', (req, res) => {
     }).then(event =>{
       res.json(event)
     })
-})
+});
 
 app.get('*', (req, res) => {
   res.sendFile('index.html', { root : __dirname+'/build'});
@@ -347,4 +368,4 @@ server.listen(PORT, err => {
   if (err) throw err;
 
   console.log('Server started, yeyyy!');
-})
+});
