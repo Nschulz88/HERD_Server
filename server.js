@@ -103,12 +103,15 @@ app.get('/api/events/:id', (req, res) => {
 })
 
 app.post('/api/events/:id', (req, res) =>{
-  const id = req.params.id;
+  const event = req.params.id;
   const vol = req.session.user_id;
+  console.log(req.params)
+  console.log(event)
+  console.log(vol)
   knex('vol_events')
     .insert({
       vol_id    : vol,
-      event_id  : id
+      event_id  : event
     })
     .then(join =>{
       res.json(join)
