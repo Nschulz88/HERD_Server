@@ -109,11 +109,29 @@ app.use(express.static(path.join(__dirname, '/build')));
 
 app.delete('/api/events/:id/cancel', (req, res) => {
   console.log('delete endpoint hit')
+  const event = req.params.id;
+  const vol = req.session.user_id;
+  console.log('3rd down is vol')
+  console.log(req.params)
+  console.log(event)
+  console.log(vol)
+  console.log(typeof vol)
+  knex('events')
+    .where({
+      id        : event
+    })
+    .then(event => {
+      let hours = Number(event[0].duration)
+      knex.raw(`UPDATE volunteers SET hours = hours - ${hours} WHERE id = ${vol}`, {
+      }).catch(function(err){
+        throw err;
+      });
+    })
   knex('vol_events')
     .select('*')
     .where({
-      event_id: req.params.id,
-      vol_id: req.body.vol_id
+      event_id  : req.params.id,
+      vol_id    : req.body.vol_id
     })
     .del()
     .then(response => {
@@ -141,16 +159,46 @@ app.get('/api/events/:id', (req, res) => {
 app.post('/api/events/:id', (req, res) =>{
   const event = req.params.id;
   const vol = req.session.user_id;
+  console.log('3rd down is vol')
   console.log(req.params)
   console.log(event)
   console.log(vol)
-  knex('vol_events')
-    .insert({
-      vol_id    : vol,
-      event_id  : event
+  console.log(typeof vol)
+  //adds from event to user profile hours on signup
+  knex('events')
+    .where({
+      id        : event
     })
-    .then(join =>{
-      res.json(join)
+    .then(event => {
+      console.log('event duration')
+      console.log(event)
+      console.log(typeof event[0].duration)
+      let hours = Number(event[0].duration)
+      console.log('this is hours')
+      console.log(hours)
+      knex.raw(`UPDATE volunteers SET hours = hours + ${hours} WHERE id = ${vol}`, {
+      }).catch(function(err){
+        throw err;
+      });
+    })
+    .catch(err =>{
+          console.log('this error')
+          console.log(err)
+        })
+    .then(notusing => {
+      console.log(notusing)
+      knex('vol_events')
+        .insert({
+          vol_id    : vol,
+          event_id  : event
+        })
+        .then(join =>{
+          res.json(join)
+        })
+        .catch(err =>{
+          console.log('this error')
+          console.log(err)
+        })
     })
 });
 
@@ -238,6 +286,7 @@ app.post('/api/register/volunteers', (req, res) => {
             name        :req.body.full_name,
             email       :req.body.email,
             password    :bcrypt.hashSync(req.body.unhashed_pass, 10),
+            hours       :0
           })
           .then(id => {
             console.log(typeof id[0]);
