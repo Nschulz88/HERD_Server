@@ -222,7 +222,8 @@ app.post('/api/register/organizers', (req, res) => {
     })
     .then(match => {
       if (match.length >= 1){
-        console.log('email already entered'); // in this case we need to send info back to front end to show falash message!!!
+        console.log('email already entered');
+        res.status(401).send('E-mail already registered');
       } else {
         knex('organizers')
           .returning('*')
@@ -237,9 +238,9 @@ app.post('/api/register/organizers', (req, res) => {
             req.session.vol_org = 'organizer';
             console.log('registration of organizer, send back data to front', );
             console.log(req.session);
-            res.json({user: response[0]});  // this is not sending to FRONT!!!!
-          }).catch(err =>{
-            console.error
+            res.json({user: response[0]});
+          }).catch(error =>{
+            console.log("Failiure after trying to register new organizer")
           })
         }
     })
@@ -277,32 +278,30 @@ app.post('/api/register/volunteers', (req, res) => {
       email: req.body.email
     })
     .then(match => {
+      console.log("THIS IS THE MATCH", match)
       if (match.length >= 1){
-        console.log('email already entered')
+        console.log('email already entered');
+        res.status(401).send('E-mail already registered');
       } else {
         knex('volunteers')
-          .returning('id')
+          .returning('*')
           .insert({
             name        :req.body.full_name,
             email       :req.body.email,
             password    :bcrypt.hashSync(req.body.unhashed_pass, 10),
             hours       :0
           })
-          .then(id => {
-            console.log(typeof id[0]);
-            req.session.user_id = id[0];
+          .then(response => {
+            req.session.user_id = response[0].id;
             req.session.vol_org = 'volunteer';
             console.log('login as vol should set cookie');
             console.log(req.session);
-            res.json({user: id[0]});
+            res.json({user: response[0]});
           })
-          .catch(err =>{
-            throw err;
+          .catch(error =>{
+            console.log("Failiure after trying to register new organizer")
           })
-      }
-    })
-    .catch(err =>{
-      throw err;
+        }
     })
 });
 
@@ -323,7 +322,7 @@ app.post('/api/login', (req, res) => {
             volunteer[0].vol_org = 'volunteer';
             res.json({user: volunteer[0]});
           } else {
-            res.status(401).json({});
+            res.send(401, 'Invalid email or password');
           }
         });
       })
@@ -347,7 +346,7 @@ app.post('/api/login', (req, res) => {
             organizer[0].vol_org = 'organizer';
             res.json({user: organizer[0]});
           } else {
-            res.status(401).json({});
+            res.send(401, 'Invalid email or password');
           }
         })
       })
@@ -377,11 +376,12 @@ app.post('/api/events', (req, res) => {
       event_date          :req.body.event_date,
       event_time          :req.body.event_time,
       duration            :req.body.duration,
-      organizer_id        :req.session.user_id
+      organizer_id        :req.session.user_id,
+      event_type          :req.body.event_type
     }).then(organizers => {
       res.json(organizers)
     }).catch(err =>{
-      throw err
+      console.err
     })
 });
 
