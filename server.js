@@ -107,6 +107,21 @@ app.use(knexLogger(knex));
 app.use(express.static(path.join(__dirname, '/build')));
 // app.get('/volunteers/:id')
 
+app.delete('/api/events/:id/cancel', (req, res) => {
+  console.log('delete endpoint hit')
+  knex('vol_events')
+    .select('*')
+    .where({
+      event_id: req.params.id,
+      vol_id: req.body.vol_id
+    })
+    .del()
+    .then(response => {
+      console.log(response)
+      res.json(response)
+    })
+})
+
 
 app.get('/api/events/:id', (req, res) => {
   console.log(req.params.id);
