@@ -31,25 +31,14 @@ const bcrypt = require('bcrypt');
 const cookieSession = require('cookie-session')
 
 const AWS = require('aws-sdk');
-var s3 = new AWS.S3();
 AWS.config.loadFromPath('./config.json');
+var s3 = new AWS.S3();
 
 const upload = multer({
   storage: multer.memoryStorage(),
 });
 
 console.log(upload);
-
-function downloadFile(absoluteUrl) {
- var link = document.createElement('a');
- link.href = absoluteUrl;
- link.download = 'true';
- document.body.appendChild(link);
- link.click();
- document.body.removeChild(link);
-};
-
-
 
 app.post('/api/upload/:id', upload.single('profilepic'), (req, res) => {
   console.log("EYYYYYY");
@@ -59,12 +48,9 @@ app.post('/api/upload/:id', upload.single('profilepic'), (req, res) => {
   var number = Math.floor(Math.random() * 10000000);
   var str = number.toString();
 
-  "https://s3-us-west-2.amazonaws.com/profilepics-herd/+ "
-
   var params = {
     Bucket: 'profilepics-herd',
     Key : str,
-    ACL: 'public-read',
     Body: req.file.buffer,
   };
 
@@ -83,8 +69,6 @@ app.post('/api/upload/:id', upload.single('profilepic'), (req, res) => {
     Bucket: 'profilepics-herd',
     Key: str,
     ACL: 'public-read',
-    ContentLanguage: 'STRING_VALUE',
-    ContentType: 'STRING_VALUE',
   };
   s3.createMultipartUpload(params, function(err, data) {
     if (err) {console.log(err, err.stack); // an error occurred
