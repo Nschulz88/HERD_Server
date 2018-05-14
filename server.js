@@ -31,8 +31,8 @@ const bcrypt = require('bcrypt');
 const cookieSession = require('cookie-session')
 
 const AWS = require('aws-sdk');
-var s3 = new AWS.S3();
 AWS.config.loadFromPath('./config.json');
+var s3 = new AWS.S3();
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -49,6 +49,16 @@ function downloadFile(absoluteUrl) {
  document.body.removeChild(link);
 };
 
+app.use(cookieSession({
+  name: 'session',
+  keys: ['yaherd'],
+}));
+
+// Log knex SQL queries to STDOUT as well
+
+// app.use(morgan);
+app.use(knexLogger(knex));
+app.use(express.static(path.join(__dirname, '/build')));
 
 
 app.post('/api/upload/:id', upload.single('profilepic'), (req, res) => {
@@ -59,39 +69,23 @@ app.post('/api/upload/:id', upload.single('profilepic'), (req, res) => {
   var number = Math.floor(Math.random() * 10000000);
   var str = number.toString();
 
-  "https://s3-us-west-2.amazonaws.com/profilepics-herd/+ "
-
-  var params = {
+  var oneParams = {
     Bucket: 'profilepics-herd',
     Key : str,
     ACL: 'public-read',
     Body: req.file.buffer,
   };
 
-  s3.upload(params, function (err, data) {
+  s3.upload(oneParams, function (err, data) {
     //handle error
     if (err) {
-      console.log("Error", err);
+      console.log("THIS IS THE Error", err);
     }
     //success
     else{
       console.log('File uploaded to s3');
     }
   })
-
-  var params = {
-    Bucket: 'profilepics-herd',
-    Key: str,
-    ACL: 'public-read',
-    ContentLanguage: 'STRING_VALUE',
-    ContentType: 'STRING_VALUE',
-  };
-  s3.createMultipartUpload(params, function(err, data) {
-    if (err) {console.log(err, err.stack); // an error occurred
-    } else {
-      console.log(data);
-    } // successful response
-  });
 
   const profileurl = ("https://s3-us-west-2.amazonaws.com/profilepics-herd/"+str);
 
@@ -111,17 +105,6 @@ app.post('/api/upload/:id', upload.single('profilepic'), (req, res) => {
       });
 });
 
-
-app.use(cookieSession({
-  name: 'session',
-  keys: ['yaherd'],
-}));
-
-// Log knex SQL queries to STDOUT as well
-
-// app.use(morgan);
-app.use(knexLogger(knex));
-app.use(express.static(path.join(__dirname, '/build')));
 // app.get('/volunteers/:id')
 
 app.delete('/api/events/:id/cancel', (req, res) => {
