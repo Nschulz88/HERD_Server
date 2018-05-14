@@ -122,22 +122,37 @@ app.delete('/api/events/:id/cancel', (req, res) => {
     })
     .then(event => {
       let hours = Number(event[0].duration)
+      console.log('these is hours ' + hours)
       knex.raw(`UPDATE volunteers SET hours = hours - ${hours} WHERE id = ${vol}`, {
-      }).catch(function(err){
+      })
+      .then(unused =>{
+        knex('vol_events')
+          .select('*')
+          .where({
+            event_id  : req.params.id,
+            vol_id    : req.body.vol_id
+          })
+          .del()
+          .then(response => {
+            console.log(response)
+            res.json(response)
+          })
+      })
+      .catch(function(err){
         throw err;
       });
     })
-  knex('vol_events')
-    .select('*')
-    .where({
-      event_id  : req.params.id,
-      vol_id    : req.body.vol_id
-    })
-    .del()
-    .then(response => {
-      console.log(response)
-      res.json(response)
-    })
+  // knex('vol_events')
+  //   .select('*')
+  //   .where({
+  //     event_id  : req.params.id,
+  //     vol_id    : req.body.vol_id
+  //   })
+  //   .del()
+  //   .then(response => {
+  //     console.log(response)
+  //     res.json(response)
+  //   })
 })
 
 
@@ -146,9 +161,10 @@ app.get('/api/events/:id', (req, res) => {
   console.log(req.params.id);
   console.log(req.session.user_id)
   knex('vol_events')
-    .where('vol_events.id', req.params.id)
+    .where('vol_events.event_id', req.params.id)
     .then(vol_events_query => {
       console.log('gets here')
+      console.log(vol_events_query)
       if (vol_events_query.length === 0){
         knex('events')
           .select('*')
@@ -165,22 +181,13 @@ app.get('/api/events/:id', (req, res) => {
           //need to check if anything in vol events for event before completeing join
           .join('vol_events', 'events.id', 'vol_events.event_id')
           .then(event =>{
+            console.log(req.params.id)
             console.log('second condish HERE HERE HERE HERE')
             console.log(event)
             res.json(event)
           })
       }
     })
-  // knex('events')
-  //   .select('*')
-  //   .where('events.id', req.params.id)
-  //   //need to check if anything in vol events for event before completeing join
-  //   .join('vol_events', 'events.id', 'vol_events.event_id')
-  //   .then(event =>{
-  //     console.log('event below HERE HERE HERE HERE')
-  //     console.log(event)
-  //     res.json(event)
-  //   })
 });
 
 app.post('/api/events/:id', (req, res) =>{
@@ -196,10 +203,10 @@ app.post('/api/events/:id', (req, res) =>{
     .then(event => {
       let hours = Number(event[0].duration)
       console.log(hours)
-      // knex.raw(`UPDATE volunteers SET hours = hours + ${hours} WHERE id = ${vol}`, {
-      // }).catch(function(err){
-      //   throw err;
-      // });
+      knex.raw(`UPDATE volunteers SET hours = hours + ${hours} WHERE id = ${vol}`, {
+      }).catch(function(err){
+        throw err;
+      });
     }).then(notusing => {
       console.log(notusing)
       console.log('vol & event')
