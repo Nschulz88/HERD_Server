@@ -88,9 +88,6 @@ app.post('/api/upload/:id', upload.single('profilepic'), (req, res) => {
   })
 
   const profileurl = ("https://s3-us-west-2.amazonaws.com/profilepics-herd/"+str);
-
-  console.log(req.params);
-
   knex('volunteers')
       .where({
         id: req.params.id
@@ -99,13 +96,12 @@ app.post('/api/upload/:id', upload.single('profilepic'), (req, res) => {
         pic_url: profileurl,
       })
       .then(response => {
-        console.log("RESPONSEEEEEEE", response)
-      }).catch(function(err){
-        throw err;
-      });
+        console.log("RESPONSEEEEEEE", response);
+        res.json(response)
+      }) .catch(err =>{
+        console.log("ERROR after profile pic upload to s3: ", err)
+      })
 });
-
-// app.get('/volunteers/:id')
 
 app.delete('/api/events/:id/cancel', (req, res) => {
   console.log('delete endpoint hit')
