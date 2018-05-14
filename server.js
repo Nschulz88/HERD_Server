@@ -340,12 +340,13 @@ app.post('/api/register/volunteers', (req, res) => {
           .then(response => {
             req.session.user_id = response[0].id;
             req.session.vol_org = 'volunteer';
+            response[0].vol_org = 'volunteer';
             console.log('login as vol should set cookie');
             console.log(req.session);
             res.json({user: response[0]});
           })
           .catch(error =>{
-            console.log("Failiure after trying to register new organizer")
+            console.log("Failiure after trying to register new volunteer")
           })
         }
     })
