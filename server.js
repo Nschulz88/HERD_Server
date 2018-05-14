@@ -51,7 +51,7 @@ function downloadFile(absoluteUrl) {
 
 
 
-app.post('/api/upload', upload.single('profilepic'), (req, res) => {
+app.post('/api/upload/:id', upload.single('profilepic'), (req, res) => {
   console.log("EYYYYYY");
 
   console.log(req.file);
@@ -92,6 +92,23 @@ app.post('/api/upload', upload.single('profilepic'), (req, res) => {
       console.log(data);
     } // successful response
   });
+
+  const profileurl = ("https://s3-us-west-2.amazonaws.com/profilepics-herd/"+str);
+
+  console.log(req.params);
+
+  knex('volunteers')
+      .where({
+        id: req.params.id
+      })
+      .update({
+        pic_url: profileurl,
+      })
+      .then(response => {
+        console.log("RESPONSEEEEEEE", response)
+      }).catch(function(err){
+        throw err;
+      });
 });
 
 
