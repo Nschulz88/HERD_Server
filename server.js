@@ -103,88 +103,76 @@ app.post('/api/upload/:id', upload.single('profilepic'), (req, res) => {
       })
 });
 
+// THIS IS WHAT WE HAD WORKING
+// app.delete('/api/events/:id/cancel', (req, res) => {
+//   console.log('delete endpoint hit')
+//   const event = req.params.id;
+//   const vol = req.session.user_id;
+//   knex('events')
+//     .where({
+//       id        : event
+//     })
+//     .then(event => {
+//       let hours = Number(event[0].duration)
+//       console.log('these is hours ' + hours)
+//       knex.raw(`UPDATE volunteers SET hours = hours - ${hours} WHERE id = ${vol}`, {
+//       })
+//       .then(unused =>{
+//         knex('vol_events')
+//           .select('*')
+//           .where({
+//             event_id  : req.params.id,
+//             vol_id    : req.body.vol_id
+//           })
+//           .del()
+//           .then(response => {
+//             console.log(response)
+//             res.json(response)
+//           })
+//       })
+//       .catch(function(err){
+//         throw err;
+//       });
+//     })
+// })
+
 app.delete('/api/events/:id/cancel', (req, res) => {
-  console.log('delete endpoint hit')
   const event = req.params.id;
   const vol = req.session.user_id;
-  console.log('3rd down is vol')
-  console.log(req.params)
   console.log(event)
   console.log(vol)
-  console.log(typeof vol)
   knex('events')
-    .where({
-      id        : event
-    })
+    .select('*')
+    .where('id', '=', event)
     .then(event => {
       let hours = Number(event[0].duration)
-      console.log('these is hours ' + hours)
+      console.log(hours)
       knex.raw(`UPDATE volunteers SET hours = hours - ${hours} WHERE id = ${vol}`, {
-      })
-      .then(unused =>{
-        knex('vol_events')
-          .select('*')
-          .where({
-            event_id  : req.params.id,
-            vol_id    : req.body.vol_id
-          })
-          .del()
-          .then(response => {
-            console.log(response)
-            res.json(response)
-          })
-      })
-      .catch(function(err){
+      }).catch(function(err){
         throw err;
       });
+    }).then(notusing => {
+      console.log(notusing)
+      console.log('vol & event')
+      console.log(vol)
+      console.log(event)
+      knex('vol_events')
+        .where({
+          vol_id    : vol,
+          event_id  : event
+        })
+        .del()
+        .then((cancel) =>{
+          console.log('cancel RESPONSE IS HERE')
+          console.log(cancel)
+          res.json(cancel)
+        })
+        .catch(err =>{
+          console.log('this error')
+          console.log(err)
+        })
     })
-  // knex('vol_events')
-  //   .select('*')
-  //   .where({
-  //     event_id  : req.params.id,
-  //     vol_id    : req.body.vol_id
-  //   })
-  //   .del()
-  //   .then(response => {
-  //     console.log(response)
-  //     res.json(response)
-  //   })
 })
-
-
-app.get('/api/events/:id', (req, res) => {
-  console.log('api/events/:id endpoint hit')
-  console.log(req.params.id);
-  console.log(req.session.user_id)
-  knex('vol_events')
-    .where('vol_events.event_id', req.params.id)
-    .then(vol_events_query => {
-      console.log('gets here')
-      console.log(vol_events_query)
-      if (vol_events_query.length === 0){
-        knex('events')
-          .select('*')
-          .where('events.id', req.params.id)
-          .then(event =>{
-            console.log('first condish')
-            console.log(event)
-            res.json(event)
-          })
-      } else {
-        knex('events')
-          .select('*')
-          .where('events.id', req.params.id)
-          //need to check if anything in vol events for event before completeing join
-          .join('vol_events', 'events.id', 'vol_events.event_id')
-          .then(event =>{
-            console.log(req.params.id)
-            console.log('second condish HERE HERE HERE HERE')
-            console.log(event)
-            res.json(event)
-          })
-      }
-    })
-});
 
 app.post('/api/events/:id', (req, res) =>{
   const event = req.params.id;
@@ -216,7 +204,7 @@ app.post('/api/events/:id', (req, res) =>{
         .then(join =>{
           res.json(join)
         })
-    .catch(err =>{
+        .catch(err =>{
           console.log('this error')
           console.log(err)
         })
@@ -224,6 +212,36 @@ app.post('/api/events/:id', (req, res) =>{
           console.log('this error')
           console.log(err)
         })
+    })
+});
+
+
+app.get('/api/events/:id', (req, res) => {
+  console.log('api/events/:id endpoint hit')
+  knex('vol_events')
+    .where('vol_events.event_id', req.params.id)
+    .then(vol_events_query => {
+      console.log('gets here')
+      console.log(vol_events_query)
+      if (vol_events_query.length === 0){
+        knex('events')
+          .select('*')
+          .where('events.id', req.params.id)
+          .then(event =>{
+            console.log('first condish')
+            res.json(event)
+          })
+      } else {
+        knex('events')
+          .select('*')
+          .where('events.id', req.params.id)
+          //need to check if anything in vol events for event before completeing join
+          .join('vol_events', 'events.id', 'vol_events.event_id')
+          .then(event =>{
+            console.log('second condish HERE HERE HERE HERE')
+            res.json(event)
+          })
+      }
     })
 });
 
