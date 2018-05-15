@@ -40,62 +40,6 @@ const upload = multer({
 
 console.log(upload);
 
-app.post('/api/upload/:id', upload.single('profilepic'), (req, res) => {
-  console.log("EYYYYYY");
-
-  console.log(req.file);
-
-  var number = Math.floor(Math.random() * 10000000);
-  var str = number.toString();
-
-  var params = {
-    Bucket: 'profilepics-herd',
-    Key : str,
-    Body: req.file.buffer,
-  };
-
-  s3.upload(params, function (err, data) {
-    //handle error
-    if (err) {
-      console.log("Error", err);
-    }
-    //success
-    else{
-      console.log('File uploaded to s3');
-    }
-  })
-
-  var params = {
-    Bucket: 'profilepics-herd',
-    Key: str,
-    ACL: 'public-read',
-  };
-  s3.createMultipartUpload(params, function(err, data) {
-    if (err) {console.log(err, err.stack); // an error occurred
-    } else {
-      console.log(data);
-    } // successful response
-  });
-
-  const profileurl = ("https://s3-us-west-2.amazonaws.com/profilepics-herd/"+str);
-
-  console.log(req.params);
-
-  knex('volunteers')
-      .where({
-        id: req.params.id
-      })
-      .update({
-        pic_url: profileurl,
-      })
-      .then(response => {
-        console.log("RESPONSEEEEEEE", response)
-      }).catch(function(err){
-        throw err;
-      });
-});
-
-
 app.use(cookieSession({
   name: 'session',
   keys: ['yaherd'],
@@ -106,7 +50,47 @@ app.use(cookieSession({
 // app.use(morgan);
 app.use(knexLogger(knex));
 app.use(express.static(path.join(__dirname, '/build')));
-// app.get('/volunteers/:id')
+
+app.post('/api/upload/:id', upload.single('profilepic'), (req, res) => {
+  console.log("EYYYYYY");
+
+  console.log(req.file);
+
+  var number = Math.floor(Math.random() * 10000000);
+  var str = number.toString();
+
+  var oneParams = {
+    Bucket: 'profilepics-herd',
+    Key : str,
+    Body: req.file.buffer,
+  };
+
+  s3.upload(oneParams, function (err, data) {
+    //handle error
+    if (err) {
+      console.log("THIS IS THE Error", err);
+    }
+    //success
+    else{
+      console.log('File uploaded to s3');
+    }
+  })
+
+  const profileurl = ("https://s3-us-west-2.amazonaws.com/profilepics-herd/"+str);
+  knex('volunteers')
+      .where({
+        id: req.params.id
+      })
+      .update({
+        pic_url: profileurl,
+      })
+      .then(response => {
+        console.log("RESPONSEEEEEEE", response);
+        res.json(response)
+      }) .catch(err =>{
+        console.log("ERROR after profile pic upload to s3: ", err)
+      })
+});
 
 app.delete('/api/events/:id/cancel', (req, res) => {
   console.log('delete endpoint hit')
@@ -324,6 +308,7 @@ app.post('/api/register/volunteers', (req, res) => {
           .then(response => {
             req.session.user_id = response[0].id;
             req.session.vol_org = 'volunteer';
+            response[0].vol_org = 'volunteer';
             console.log('login as vol should set cookie');
             console.log(req.session);
             res.json({user: response[0]});
