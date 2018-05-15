@@ -40,15 +40,6 @@ const upload = multer({
 
 console.log(upload);
 
-function downloadFile(absoluteUrl) {
- var link = document.createElement('a');
- link.href = absoluteUrl;
- link.download = 'true';
- document.body.appendChild(link);
- link.click();
- document.body.removeChild(link);
-};
-
 app.use(cookieSession({
   name: 'session',
   keys: ['yaherd'],
@@ -59,7 +50,6 @@ app.use(cookieSession({
 // app.use(morgan);
 app.use(knexLogger(knex));
 app.use(express.static(path.join(__dirname, '/build')));
-
 
 app.post('/api/upload/:id', upload.single('profilepic'), (req, res) => {
   console.log("EYYYYYY");
@@ -72,7 +62,6 @@ app.post('/api/upload/:id', upload.single('profilepic'), (req, res) => {
   var oneParams = {
     Bucket: 'profilepics-herd',
     Key : str,
-    ACL: 'public-read',
     Body: req.file.buffer,
   };
 
@@ -276,9 +265,9 @@ app.get('/api/volunteers/:id', (req, res) => {
   console.log(req.params);
   knex('volunteers')
     .select('*')
-    .where({
-      id: req.params.id
-    })
+    .where('volunteers.id', req.params.id)
+    .join('vol_events', 'volunteers.id', 'vol_events.vol_id')
+    .join('events', 'events.id', 'vol_events.event_id')
     .then(volunteers => {
       console.log(volunteers);
       res.json(volunteers);
