@@ -103,39 +103,6 @@ app.post('/api/upload/:id', upload.single('profilepic'), (req, res) => {
       })
 });
 
-// THIS IS WHAT WE HAD WORKING
-// app.delete('/api/events/:id/cancel', (req, res) => {
-//   console.log('delete endpoint hit')
-//   const event = req.params.id;
-//   const vol = req.session.user_id;
-//   knex('events')
-//     .where({
-//       id        : event
-//     })
-//     .then(event => {
-//       let hours = Number(event[0].duration)
-//       console.log('these is hours ' + hours)
-//       knex.raw(`UPDATE volunteers SET hours = hours - ${hours} WHERE id = ${vol}`, {
-//       })
-//       .then(unused =>{
-//         knex('vol_events')
-//           .select('*')
-//           .where({
-//             event_id  : req.params.id,
-//             vol_id    : req.body.vol_id
-//           })
-//           .del()
-//           .then(response => {
-//             console.log(response)
-//             res.json(response)
-//           })
-//       })
-//       .catch(function(err){
-//         throw err;
-//       });
-//     })
-// })
-
 app.delete('/api/events/:id/cancel', (req, res) => {
   const event = req.params.id;
   const vol = req.session.user_id;
