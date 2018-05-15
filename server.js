@@ -250,43 +250,33 @@ app.get('/api/volunteers/:id', (req, res) => {
   console.log(req.params);
 
   knex('vol_events')
-    .where('vol_events.event_id', req.params.id)
+    .select('*')
+    .where('vol_events.vol_id','=', req.params.id)
     .then(vol_events_query => {
-      console.log('gets here')
-      console.log(vol_events_query)
-      if (vol_events_query.length === 0){
+      console.log(vol_events_query.length)
+      if(vol_events_query.length === 0){
+        console.log('frst condish')
         knex('volunteers')
           .select('*')
-          .where('volunteers.id', req.params.id)
+          .where('id','=', req.params.id)
           .then(volunteers => {
-            console.log(volunteers);
+            console.log('first condish volunteers')
+            console.log('volunteers')
             res.json(volunteers);
           });
       } else {
-      knex('volunteers')
-        .select('*')
-        .where('volunteers.id', req.params.id)
-        .join('vol_events', 'volunteers.id', 'vol_events.vol_id')
-        .join('events', 'events.id', 'vol_events.event_id')
-        .then(volunteers => {
-          console.log(volunteers);
-          res.json(volunteers);
-        });
+        console.log('second condish')
+        knex('volunteers')
+          .select('*')
+          .where('volunteers.id', req.params.id)
+          .join('vol_events', 'volunteers.id', 'vol_events.vol_id')
+          .join('events', 'events.id', 'vol_events.event_id')
+          .then(volunteers => {
+            res.json(volunteers);
+            res.end()
+          });
       }
     })
-
-
-
-
-  knex('volunteers')
-    .select('*')
-    .where('volunteers.id', req.params.id)
-    .join('vol_events', 'volunteers.id', 'vol_events.vol_id')
-    .join('events', 'events.id', 'vol_events.event_id')
-    .then(volunteers => {
-      console.log(volunteers);
-      res.json(volunteers);
-    });
 });
 
 app.get('/api/volunteers', (req, res) => {
