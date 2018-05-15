@@ -281,9 +281,9 @@ app.get('/api/volunteers/:id', (req, res) => {
   console.log(req.params);
   knex('volunteers')
     .select('*')
-    .where({
-      id: req.params.id
-    })
+    .where('volunteers.id', req.params.id)
+    .join('vol_events', 'volunteers.id', 'vol_events.vol_id')
+    .join('events', 'events.id', 'vol_events.event_id')
     .then(volunteers => {
       console.log(volunteers);
       res.json(volunteers);
