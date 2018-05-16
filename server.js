@@ -54,9 +54,10 @@ if (process.env.NODE_ENV === "production") {
 app.use(express.static(path.join(__dirname, '/build')));
 }
 
-app.get('/testtwilio', (req,res) => {
+app.post('/api/twilio', (req,res) => {
+  console.log("PHONE UMBER BEING PASSED IN BODY", req.body)
   client.messages.create({
-    to: '+16043630966',
+    to: '+1'+req.body.phone_number,
     from: '+16042568028',
     body: "Hello World, YEY this works"
   }, function(err, data) {
@@ -416,7 +417,8 @@ app.post('/api/events', (req, res) => {
       event_time          :req.body.event_time,
       duration            :req.body.duration,
       organizer_id        :req.session.user_id,
-      event_type          :req.body.event_type
+      event_type          :req.body.event_type,
+      phone_number        :req.body.phone_number,
     }).then(organizers => {
       res.json(organizers)
     }).catch(err =>{
@@ -449,16 +451,16 @@ app.get('/api/events', (req, res) => {
     })
 });
 
-app.get('/api/events/:id', (req, res) => {
-  console.log(req.params.id)
-  knex('events')
-    .select('*')
-    .where({
-      id : req.params.id
-    }).then(event =>{
-      res.json(event)
-    })
-});
+// app.get('/api/events/:id', (req, res) => {
+//   console.log(req.params.id)
+//   knex('events')
+//     .select('*')
+//     .where({
+//       id : req.params.id
+//     }).then(event =>{
+//       res.json(event)
+//     })
+// });
 
 app.get('*', (req, res) => {
   res.sendFile('index.html', { root : __dirname+'/build'});
