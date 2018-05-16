@@ -5,6 +5,7 @@ const express = require('express');
 const fs = require('fs');
 const http = require('http');
 const multer = require('multer');
+const client = require('twilio')(process.env.TWILIO_SID, process.env.TWILIO_TOKEN);
 const corsPrefetch = require('cors-prefetch-middleware');
 const imagesUpload = require('images-upload-middleware');
 const compression = require('compression');
@@ -13,7 +14,7 @@ const path = require('path');
 
 const normalizePort = port => parseInt(port, 10);
 const PORT = normalizePort(process.env.PORT || 5000);
-const ENV = process.env.ENV || "development";
+const ENV = process.env.NODE_ENV || "development";
 const app = express();
 const dev = app.get('env') !== 'production';
 
@@ -49,7 +50,24 @@ app.use(cookieSession({
 
 // app.use(morgan);
 app.use(knexLogger(knex));
+if (process.env.NODE_ENV === "production") {
 app.use(express.static(path.join(__dirname, '/build')));
+}
+
+app.get('/testtwilio', (req,res) => {
+  client.messages.create({
+    to: '+16043630966',
+    from: '+16042568028',
+    body: "Hello World, YEY this works"
+  }, function(err, data) {
+    if(err) {
+      console.log(err)
+    } else {
+      console.log(data);
+    }
+  });
+  res.redirect("/")
+});
 
 app.post('/api/upload/:id', upload.single('profilepic'), (req, res) => {
   console.log("EYYYYYY");
