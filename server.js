@@ -193,6 +193,7 @@ app.get('/api/events/:id', (req, res) => {
           .where('events.id', req.params.id)
           //need to check if anything in vol events for event before completeing join
           .join('vol_events', 'events.id', 'vol_events.event_id')
+          .join('volunteers', 'volunteers.id', 'vol_events.vol_id')
           .then(event =>{
             console.log('second condish HERE HERE HERE HERE')
             res.json(event)
