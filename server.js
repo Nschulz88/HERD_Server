@@ -59,7 +59,7 @@ app.post('/api/twilio', (req,res) => {
   client.messages.create({
     to: '+1'+req.body.phone_number,
     from: '+16042568028',
-    body: "Hello World, YEY this works"
+    body: 'Hey, awesome... '+req.body.name+' just signed up for your Event No.'+req.body.event_id+'!', 
   }, function(err, data) {
     if(err) {
       console.log(err)
