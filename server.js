@@ -39,14 +39,11 @@ const upload = multer({
   storage: multer.memoryStorage(),
 });
 
-console.log(upload);
-
 app.use(cookieSession({
   name: 'session',
   keys: ['yaherd'],
 }));
 
-// Log knex SQL queries to STDOUT as well
 
 // app.use(morgan);
 app.use(knexLogger(knex));
@@ -55,7 +52,6 @@ app.use(express.static(path.join(__dirname, '/build')));
 }
 
 app.post('/api/twilio', (req,res) => {
-  console.log("PHONE UMBER BEING PASSED IN BODY", req.body)
   client.messages.create({
     to: '+1'+req.body.phone_number,
     from: '+16042568028',
@@ -63,18 +59,12 @@ app.post('/api/twilio', (req,res) => {
   }, function(err, data) {
     if(err) {
       console.log(err)
-    } else {
-      console.log(data);
     }
   });
   res.redirect("/")
 });
 
 app.post('/api/upload/:id', upload.single('profilepic'), (req, res) => {
-  console.log("EYYYYYY");
-
-  console.log(req.file);
-
   var number = Math.floor(Math.random() * 10000000);
   var str = number.toString();
 
@@ -85,9 +75,9 @@ app.post('/api/upload/:id', upload.single('profilepic'), (req, res) => {
   };
 
   s3.upload(oneParams, function (err, data) {
-    //handle error
+    //error
     if (err) {
-      console.log("THIS IS THE Error", err);
+      console.log("Error in s3 upload", err);
     }
     //success
     else{
@@ -104,33 +94,25 @@ app.post('/api/upload/:id', upload.single('profilepic'), (req, res) => {
         pic_url: profileurl,
       })
       .then(response => {
-        console.log("RESPONSEEEEEEE", response);
         res.json(response)
       }) .catch(err =>{
-        console.log("ERROR after profile pic upload to s3: ", err)
+        console.log("ERROR after upload to s3 ", err)
       })
 });
 
 app.delete('/api/events/:id/cancel', (req, res) => {
   const event = req.params.id;
   const vol = req.session.user_id;
-  console.log(event)
-  console.log(vol)
   knex('events')
     .select('*')
     .where('id', '=', event)
     .then(event => {
       let hours = Number(event[0].duration)
-      console.log(hours)
       knex.raw(`UPDATE volunteers SET hours = hours - ${hours} WHERE id = ${vol}`, {
       }).catch(function(err){
         throw err;
       });
     }).then(notusing => {
-      console.log(notusing)
-      console.log('vol & event')
-      console.log(vol)
-      console.log(event)
       knex('vol_events')
         .where({
           vol_id    : vol,
@@ -138,12 +120,9 @@ app.delete('/api/events/:id/cancel', (req, res) => {
         })
         .del()
         .then((cancel) =>{
-          console.log('cancel RESPONSE IS HERE')
-          console.log(cancel)
           res.json(cancel)
         })
         .catch(err =>{
-          console.log('this error')
           console.log(err)
         })
     })
@@ -152,25 +131,16 @@ app.delete('/api/events/:id/cancel', (req, res) => {
 app.post('/api/events/:id', (req, res) =>{
   const event = req.params.id;
   const vol = req.session.user_id;
-  console.log(event)
-  console.log(vol)
-  //adds from event to user profile hours on signup
-  console.log('got here')
   knex('events')
     .select('*')
     .where('id', '=', event)
     .then(event => {
       let hours = Number(event[0].duration)
-      console.log(hours)
       knex.raw(`UPDATE volunteers SET hours = hours + ${hours} WHERE id = ${vol}`, {
       }).catch(function(err){
         throw err;
       });
     }).then(notusing => {
-      console.log(notusing)
-      console.log('vol & event')
-      console.log(vol)
-      console.log(event)
       knex('vol_events')
         .insert({
           vol_id    : vol,
@@ -180,11 +150,6 @@ app.post('/api/events/:id', (req, res) =>{
           res.json(join)
         })
         .catch(err =>{
-          console.log('this error')
-          console.log(err)
-        })
-        .catch(err =>{
-          console.log('this error')
           console.log(err)
         })
     })
@@ -192,18 +157,14 @@ app.post('/api/events/:id', (req, res) =>{
 
 
 app.get('/api/events/:id', (req, res) => {
-  console.log('api/events/:id endpoint hit')
   knex('vol_events')
     .where('vol_events.event_id', req.params.id)
     .then(vol_events_query => {
-      console.log('gets here')
-      console.log(vol_events_query)
       if (vol_events_query.length === 0){
         knex('events')
           .select('*')
           .where('events.id', req.params.id)
           .then(event =>{
-            console.log('first condish')
             res.json(event)
           })
       } else {
@@ -214,7 +175,6 @@ app.get('/api/events/:id', (req, res) => {
           .join('vol_events', 'events.id', 'vol_events.event_id')
           .join('volunteers', 'volunteers.id', 'vol_events.vol_id')
           .then(event =>{
-            console.log('second condish HERE HERE HERE HERE')
             res.json(event)
           })
       }
@@ -222,7 +182,6 @@ app.get('/api/events/:id', (req, res) => {
 });
 
 app.get('/api/organizers', (req, res) => {
-  console.log("organizers");
   knex('organizers')
     .select('*')
     .then(organizers => {
@@ -232,8 +191,6 @@ app.get('/api/organizers', (req, res) => {
 
 // If logged in, shows name, error handling for name or organizer for email registered
 app.post('/api/register/organizers', (req, res) => {
-  console.log("posted to organizers!")
-  console.log(req.body)
   knex('organizers')
     .select('*')
     .where({
@@ -241,7 +198,6 @@ app.post('/api/register/organizers', (req, res) => {
     })
     .then(match => {
       if (match.length >= 1){
-        console.log('email already entered');
         res.status(401).send('E-mail already registered');
       } else {
         knex('organizers')
@@ -252,40 +208,29 @@ app.post('/api/register/organizers', (req, res) => {
             email       :req.body.email,
             password    :bcrypt.hashSync(req.body.unhashed_pass, 10),
           }).then(response => {
-            console.log("RESPONSEEEEEEE", response)
             req.session.user_id = response[0].id;
             req.session.vol_org = 'organizer';
-            console.log('registration of organizer, send back data to front', );
-            console.log(req.session);
             res.json({user: response[0]});
           }).catch(error =>{
-            console.log("Failure after trying to register new organizer")
+            console.log("Failure after trying to register new organizer", error)
           })
         }
     })
 });
 
 app.get('/api/volunteers/:id', (req, res) => {
-  console.log("volunteer id endpoint hit");
-  console.log(req.params);
-
   knex('vol_events')
     .select('*')
     .where('vol_events.vol_id','=', req.params.id)
     .then(vol_events_query => {
-      console.log(vol_events_query.length)
       if(vol_events_query.length === 0){
-        console.log('frst condish')
         knex('volunteers')
           .select('*')
           .where('id','=', req.params.id)
           .then(volunteers => {
-            console.log('first condish volunteers')
-            console.log('volunteers')
             res.json(volunteers);
           });
       } else {
-        console.log('second condish')
         knex('volunteers')
           .select('*')
           .where('volunteers.id', req.params.id)
@@ -300,7 +245,6 @@ app.get('/api/volunteers/:id', (req, res) => {
 });
 
 app.get('/api/volunteers', (req, res) => {
-  console.log("volunteers");
   knex('volunteers')
     .select('*')
     .then(volunteers => {
@@ -309,17 +253,13 @@ app.get('/api/volunteers', (req, res) => {
 });
 
 app.post('/api/register/volunteers', (req, res) => {
-  console.log("posted to volunteers!");
-  console.log(req.body);
   knex('volunteers')
     .select('*')
     .where({
       email: req.body.email
     })
     .then(match => {
-      console.log("THIS IS THE MATCH", match)
       if (match.length >= 1){
-        console.log('email already entered');
         res.status(401).send('E-mail already registered');
       } else {
         knex('volunteers')
@@ -334,19 +274,16 @@ app.post('/api/register/volunteers', (req, res) => {
             req.session.user_id = response[0].id;
             req.session.vol_org = 'volunteer';
             response[0].vol_org = 'volunteer';
-            console.log('login as vol should set cookie');
-            console.log(req.session);
             res.json({user: response[0]});
           })
           .catch(error =>{
-            console.log("Failiure after trying to register new organizer")
+            console.log("Failiure after trying to register new organizer", error)
           })
         }
     })
 });
 
 app.post('/api/login', (req, res) => {
-  console.log(req.body);
   if (req.body.vol_org === 'vol'){
     knex('volunteers')
       .select('*')
@@ -378,8 +315,6 @@ app.post('/api/login', (req, res) => {
       .then(organizer => {
         bcrypt.compare(req.body.password, organizer[0].password, function(err, result) {
           if(result === true){
-            console.log("ORGANIZER PASSWORDS MATCHED!")
-            console.log(organizer)
             req.session.user_id = organizer[0].id;
             req.session.vol_org = 'organizer';
             delete organizer[0].password;
@@ -397,15 +332,12 @@ app.post('/api/login', (req, res) => {
 });
 
 app.post('/api/logout', (req, res) => {
-  console.log("getting to server endpoint")
   req.session = null;
   return res.status(200).json({});
 });
 
 
 app.post('/api/events', (req, res) => {
-  console.log("posted to events!")
-  console.log(req.body)
   knex('events')
     .insert({
       location            :req.body.location,
@@ -427,8 +359,6 @@ app.post('/api/events', (req, res) => {
 });
 
 app.get('/api/rsvps/:id', (req, res) => {
-  console.log('endpoint hit')
-  console.log(req.params.id)
   knex('vol_events')
     .select('*')
     .where('event_id', '=', req.params.id)
@@ -438,29 +368,15 @@ app.get('/api/rsvps/:id', (req, res) => {
 });
 
 app.get('/api/events', (req, res) => {
-  console.log("events");
-  console.log(req.session)
   let today = new Date()
   knex('events')
     .select('*')
     .where('event_date', '>=', today)
-    //.fullOuterJoin('vol_events', 'events.id', 'vol_events.event_id')
     .then(organizers => {
-      console.log(organizers)
       res.json(organizers)
     })
 });
 
-// app.get('/api/events/:id', (req, res) => {
-//   console.log(req.params.id)
-//   knex('events')
-//     .select('*')
-//     .where({
-//       id : req.params.id
-//     }).then(event =>{
-//       res.json(event)
-//     })
-// });
 
 app.get('*', (req, res) => {
   res.sendFile('index.html', { root : __dirname+'/build'});
