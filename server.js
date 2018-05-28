@@ -9,7 +9,6 @@ const client = require('twilio')(process.env.TWILIO_SID, process.env.TWILIO_TOKE
 const corsPrefetch = require('cors-prefetch-middleware');
 const imagesUpload = require('images-upload-middleware');
 const compression = require('compression');
-// const morgan = require('morgan');
 const path = require('path');
 
 const normalizePort = port => parseInt(port, 10);
@@ -44,8 +43,6 @@ app.use(cookieSession({
   keys: ['yaherd'],
 }));
 
-
-// app.use(morgan);
 app.use(knexLogger(knex));
 if (process.env.NODE_ENV === "production") {
 app.use(express.static(path.join(__dirname, '/build')));
@@ -54,7 +51,7 @@ app.use(express.static(path.join(__dirname, '/build')));
 app.post('/api/twilio', (req,res) => {
   client.messages.create({
     to: '+1'+req.body.phone_number,
-    from: '+16042568028',
+    from: process.env.TWILIO_PHONE_NUMBER,
     body: 'Hey, awesome... '+req.body.name+' just signed up for your Event No.'+req.body.event_id+'!', 
   }, function(err, data) {
     if(err) {
